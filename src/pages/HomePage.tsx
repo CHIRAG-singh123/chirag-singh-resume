@@ -59,7 +59,7 @@ export function HomePage() {
                 <TypingText
                   phrases={[
                     'AI-Augmented Software Engineer',
-                    'Full-Stack Builder',
+                    'Full-Stack Application Developer',
                     'ML / GAN Enthusiast',
                     'MERN & Django Dev',
                   ]}
