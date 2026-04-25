@@ -22,6 +22,16 @@ import { StatCard } from '../components/StatCard'
 import { TypingText } from '../components/TypingText'
 import { CONTACT_LINKS, resume } from '../data/resume'
 
+const PROJECT_GITHUB: Record<string, string> = {
+  Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
+  'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
+  'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
+  'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',
+  'LJ Learning Platform': 'https://github.com/ayushpatel112233/Online-Learing-app',
+  'Rhythm Realm': 'https://github.com/CHIRAG-singh123/music-streamer-mern',
+  CustomerSync: 'https://github.com/CHIRAG-singh123/CRM',
+}
+
 export function HomePage() {
   const featuredProjects = resume.projects.slice(0, 3)
 
@@ -169,7 +179,12 @@ export function HomePage() {
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featuredProjects.map((project, idx) => (
-            <ProjectCard key={project.name} project={project} index={idx} />
+            <ProjectCard
+              key={project.name}
+              project={project}
+              index={idx}
+              githubUrl={PROJECT_GITHUB[project.name]}
+            />
           ))}
         </div>
 
