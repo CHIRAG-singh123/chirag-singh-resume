@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import type { ComponentType, SVGProps } from 'react'
+import { springs } from '../motion'
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>
 
@@ -28,8 +29,8 @@ export function ContactButton({
       : 'border border-border bg-card/70 text-foreground backdrop-blur hover:border-accent/50 hover:bg-accent/10'
   return (
     <motion.a
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -4, scale: 1.02, transition: springs.hover }}
+      whileTap={{ scale: 0.97, transition: springs.tap }}
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}

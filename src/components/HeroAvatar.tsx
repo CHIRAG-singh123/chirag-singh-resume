@@ -1,12 +1,15 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { CONTACT_LINKS } from '../data/resume'
+import { durations, easings } from '../motion'
 
 export function HeroAvatar() {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, rotate: -6 }}
+      initial={{ opacity: 0, scale: 0.8, rotate: shouldReduceMotion ? 0 : -6 }}
       animate={{ opacity: 1, scale: 1, rotate: 0 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: durations.slow, ease: easings.cinematic }}
       className="relative mx-auto aspect-square w-64 sm:w-80 md:w-[22rem]"
     >
       <div
@@ -16,15 +19,23 @@ export function HeroAvatar() {
 
       <motion.div
         className="absolute inset-0 rounded-full border border-dashed border-accent/40"
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 28, ease: 'linear' }}
+        animate={shouldReduceMotion ? undefined : { rotate: 360 }}
+        transition={
+          shouldReduceMotion
+            ? undefined
+            : { repeat: Infinity, duration: 28, ease: 'linear' }
+        }
       >
         <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-accent shadow-glow" />
       </motion.div>
       <motion.div
         className="absolute inset-3 rounded-full border border-dashed border-accent-secondary/40"
-        animate={{ rotate: -360 }}
-        transition={{ repeat: Infinity, duration: 22, ease: 'linear' }}
+        animate={shouldReduceMotion ? undefined : { rotate: -360 }}
+        transition={
+          shouldReduceMotion
+            ? undefined
+            : { repeat: Infinity, duration: 22, ease: 'linear' }
+        }
       >
         <span className="absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-accent-secondary shadow-glow-secondary" />
       </motion.div>
@@ -43,7 +54,7 @@ export function HeroAvatar() {
       <motion.span
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.7, duration: durations.base, ease: easings.cinematic }}
         className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-card/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground shadow-md backdrop-blur"
       >
         <span className="mr-2 inline-block h-2 w-2 rounded-full bg-chart-positive animate-pulse" />

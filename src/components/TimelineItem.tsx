@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Briefcase } from 'lucide-react'
 import type { ExperienceItem } from '../lib/resume/types'
+import { distances, durations, easings } from '../motion'
 
 interface TimelineItemProps {
   item: ExperienceItem
@@ -11,10 +12,14 @@ interface TimelineItemProps {
 export function TimelineItem({ item, index, isLast = false }: TimelineItemProps) {
   return (
     <motion.li
-      initial={{ opacity: 0, x: -24 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: -distances.md, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: durations.medium,
+        delay: index * 0.1,
+        ease: easings.emphasized,
+      }}
       className="relative flex gap-6 pb-10 last:pb-0"
     >
       <div className="relative flex flex-col items-center">
@@ -27,7 +32,7 @@ export function TimelineItem({ item, index, isLast = false }: TimelineItemProps)
         )}
       </div>
 
-      <div className="flex-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex-1 rounded-2xl border border-border bg-card p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-md">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <h3 className="font-display text-lg font-bold text-foreground sm:text-xl">

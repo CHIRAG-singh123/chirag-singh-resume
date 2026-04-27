@@ -1,6 +1,7 @@
-import { motion, useInView, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useInView, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import { cinematicTransition, durations, springs } from '../motion'
 
 interface StatCardProps {
   icon: LucideIcon
@@ -13,13 +14,20 @@ interface StatCardProps {
 export function StatCard({ icon: Icon, value, suffix = '+', label, delay = 0 }: StatCardProps) {
   const ref = useRef<HTMLDivElement | null>(null)
   const inView = useInView(ref, { once: true, amount: 0.4 })
+  const shouldReduceMotion = useReducedMotion()
   const motionValue = useMotionValue(0)
   const spring = useSpring(motionValue, { damping: 22, stiffness: 110 })
   const numberRef = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
-    if (inView) motionValue.set(value)
-  }, [inView, motionValue, value])
+    if (!inView) return
+    if (shouldReduceMotion) {
+      motionValue.jump(value)
+      if (numberRef.current) numberRef.current.textContent = value.toString()
+      return
+    }
+    motionValue.set(value)
+  }, [inView, motionValue, shouldReduceMotion, value])
 
   useEffect(() => {
     return spring.on('change', (latest) => {
@@ -32,11 +40,12 @@ export function StatCard({ icon: Icon, value, suffix = '+', label, delay = 0 }: 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, delay }}
-      className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm"
+      transition={cinematicTransition(durations.medium, delay)}
+      whileHover={{ y: -4, transition: springs.hover }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-lg"
     >
       <div className="flex items-center gap-3">
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent">

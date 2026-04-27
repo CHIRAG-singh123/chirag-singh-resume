@@ -7,6 +7,14 @@ import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { SkillBadge } from '../components/SkillBadge'
 import { resume } from '../data/resume'
+import {
+  cinematicTransition,
+  durations,
+  itemVariantsScale,
+  sectionVariants,
+  springs,
+  viewport,
+} from '../motion'
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
   Languages: Code2,
@@ -44,11 +52,13 @@ export function SkillsPage() {
             return (
               <motion.div
                 key={group.label}
-                initial={{ opacity: 0, y: 32 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: idx * 0.08 }}
-                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-sm transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
+                variants={sectionVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: viewport.once, amount: 0.2 }}
+                transition={cinematicTransition(durations.medium, idx * 0.08)}
+                whileHover={{ y: -6, transition: springs.hover }}
+                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
               >
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl transition-all duration-500 group-hover:bg-accent/25" />
 
@@ -96,11 +106,13 @@ export function SkillsPage() {
             ].map((item, idx) => (
               <motion.div
                 key={item}
-                initial={{ opacity: 0, scale: 0.92 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: idx * 0.06 }}
-                className="rounded-2xl border border-border bg-background/80 p-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/50"
+                variants={itemVariantsScale}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: viewport.once, amount: 0.4 }}
+                transition={cinematicTransition(durations.base, idx * 0.06)}
+                whileHover={{ y: -4, transition: springs.hover }}
+                className="rounded-2xl border border-border bg-background/80 p-5 backdrop-blur transition-[border-color,box-shadow] duration-300 hover:border-accent/50"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
                   <Cpu className="h-4 w-4" />

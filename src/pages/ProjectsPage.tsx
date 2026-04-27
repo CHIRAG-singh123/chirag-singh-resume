@@ -6,6 +6,7 @@ import { PageTransition } from '../components/PageTransition'
 import { ProjectCard } from '../components/ProjectCard'
 import { SectionHeading } from '../components/SectionHeading'
 import { resume } from '../data/resume'
+import { springs } from '../motion'
 
 const PROJECT_GITHUB: Record<string, string> = {
   Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
@@ -58,7 +59,8 @@ export function ProjectsPage() {
                   type="button"
                   key={tag}
                   onClick={() => setActiveTag(tag)}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -2, transition: springs.hover }}
+                  whileTap={{ scale: 0.95, transition: springs.tap }}
                   className={`relative rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors ${
                     active
                       ? 'text-accent-foreground'
@@ -68,7 +70,7 @@ export function ProjectsPage() {
                   {active && (
                     <motion.span
                       layoutId="project-tag"
-                      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                      transition={springs.layout}
                       className="absolute inset-0 -z-10 rounded-full bg-hero-gradient bg-[length:200%_200%] animate-gradient-shift"
                     />
                   )}

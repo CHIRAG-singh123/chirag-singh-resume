@@ -6,6 +6,7 @@ import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { TimelineItem } from '../components/TimelineItem'
 import { resume } from '../data/resume'
+import { cinematicTransition, distances, durations, springs, viewport } from '../motion'
 
 export function ExperiencePage() {
   return (
@@ -55,11 +56,12 @@ export function ExperiencePage() {
             {resume.achievements.map((achievement, idx) => (
               <motion.li
                 key={achievement}
-                initial={{ opacity: 0, x: -24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="group flex items-start gap-3 rounded-2xl border border-border bg-background/80 p-5 transition-all hover:-translate-y-0.5 hover:border-accent/50"
+                initial={{ opacity: 0, x: -distances.md, filter: 'blur(6px)' }}
+                whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                viewport={{ once: viewport.once, amount: viewport.amount }}
+                transition={cinematicTransition(durations.base, idx * 0.08)}
+                whileHover={{ y: -4, transition: springs.hover }}
+                className="group flex items-start gap-3 rounded-2xl border border-border bg-background/80 p-5 transition-[border-color,box-shadow] duration-300 hover:border-accent/50"
               >
                 <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
                   <Award className="h-4 w-4" />

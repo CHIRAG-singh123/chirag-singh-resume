@@ -3,6 +3,7 @@ import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { resume } from '../data/resume'
+import { durations, easings, springs } from '../motion'
 import { ThemeToggle } from './ThemeToggle'
 
 interface NavLinkDef {
@@ -43,9 +44,9 @@ export function Navbar() {
 
   return (
     <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ y: -80, opacity: 0, filter: 'blur(8px)' }}
+      animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+      transition={{ duration: durations.medium, ease: easings.cinematic }}
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? 'backdrop-blur-xl bg-background/70 border-b border-border shadow-sm'
@@ -87,7 +88,7 @@ export function Navbar() {
                     {isActive && (
                       <motion.span
                         layoutId="nav-active"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        transition={springs.layout}
                         className="absolute inset-0 -z-10 rounded-full bg-accent/15 ring-1 ring-accent/40"
                       />
                     )}
@@ -118,16 +119,16 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: durations.fast, ease: easings.smooth }}
             className="md:hidden overflow-hidden border-t border-border bg-background/90 backdrop-blur-xl"
           >
             <ul className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:px-6">
               {NAV_LINKS.map((link, idx) => (
                 <motion.li
                   key={link.to}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 * idx }}
+                  initial={{ opacity: 0, x: -20, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: 0.05 * idx, duration: durations.fast, ease: easings.cinematic }}
                 >
                   <NavLink
                     to={link.to}

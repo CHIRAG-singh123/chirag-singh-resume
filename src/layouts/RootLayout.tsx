@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { AnimatedOutlet } from '../components/AnimatedOutlet'
 import { BackToTop } from '../components/BackToTop'
 import { Footer } from '../components/Footer'
 import { Navbar } from '../components/Navbar'
@@ -18,7 +19,6 @@ export function RootLayout() {
   const location = useLocation()
 
   useEffect(() => {
-    // Avoid non-standard scroll behavior values during route transitions
     window.scrollTo(0, 0)
     document.title =
       ROUTE_TITLES[location.pathname] ?? 'Chirag Singh — AI-Augmented Software Engineer'
@@ -29,7 +29,7 @@ export function RootLayout() {
       <ScrollProgress />
       <Navbar />
       <main className="relative">
-        <Outlet />
+        <AnimatedOutlet />
       </main>
       <Footer />
       <BackToTop />

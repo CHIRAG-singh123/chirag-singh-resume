@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Download } from 'lucide-react'
 import { CONTACT_LINKS, resume } from '../data/resume'
+import { springs } from '../motion'
 
 interface DownloadResumeButtonProps {
   variant?: 'primary' | 'ghost'
@@ -22,8 +23,8 @@ export function DownloadResumeButton({
   if (variant === 'ghost') {
     return (
       <motion.a
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.97 }}
+        whileHover={{ y: -3, scale: 1.02, transition: springs.hover }}
+        whileTap={{ scale: 0.97, transition: springs.tap }}
         href={CONTACT_LINKS.resumeHref}
         download={downloadFilename}
         className={`${base} ${sizing} border border-border bg-card/70 text-foreground backdrop-blur hover:border-accent/50 hover:bg-accent/10`}
@@ -36,8 +37,8 @@ export function DownloadResumeButton({
 
   return (
     <motion.a
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -3, scale: 1.03, transition: springs.hover }}
+      whileTap={{ scale: 0.97, transition: springs.tap }}
       href={CONTACT_LINKS.resumeHref}
       download={downloadFilename}
       className={`${base} ${sizing} bg-hero-gradient bg-[length:200%_200%] text-white shadow-glow animate-gradient-shift`}

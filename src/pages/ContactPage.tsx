@@ -9,6 +9,7 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { CONTACT_LINKS, resume } from '../data/resume'
+import { sectionVariantsCinematic, springs, viewport } from '../motion'
 
 export function ContactPage() {
   const [name, setName] = useState('')
@@ -68,7 +69,7 @@ export function ContactPage() {
       <AnimatedSection className="mx-auto max-w-6xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-2">
           <motion.div
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -6, transition: springs.hover }}
             className="group relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm"
           >
             <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-accent/10 blur-3xl" />
@@ -111,7 +112,7 @@ export function ContactPage() {
           </motion.div>
 
           <motion.div
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -6, transition: springs.hover }}
             className="group relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm"
           >
             <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-accent-secondary/20 blur-3xl" />
@@ -183,10 +184,10 @@ export function ContactPage() {
 
       <AnimatedSection className="mx-auto max-w-4xl px-4 pb-24 sm:px-6 lg:px-8">
         <motion.form
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          variants={sectionVariantsCinematic}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: viewport.once, amount: 0.15 }}
           onSubmit={(e) => {
             e.preventDefault()
             window.location.href = mailtoLink()

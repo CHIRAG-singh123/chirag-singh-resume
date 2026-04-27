@@ -1,5 +1,15 @@
 import { motion, type Variants } from 'framer-motion'
 import type { ReactNode } from 'react'
+import {
+  itemVariants,
+  listStagger,
+  sectionVariants,
+  sectionVariantsCinematic,
+  sectionVariantsSoft,
+  viewport as defaultViewport,
+} from '../motion'
+
+type SectionVariant = 'soft' | 'medium' | 'cinematic'
 
 interface AnimatedSectionProps {
   children: ReactNode
@@ -7,16 +17,15 @@ interface AnimatedSectionProps {
   delay?: number
   once?: boolean
   as?: 'section' | 'div' | 'article' | 'header'
+  variant?: SectionVariant
+  viewportAmount?: number
+  stagger?: boolean
 }
 
-const variants: Variants = {
-  hidden: { opacity: 0, y: 32, filter: 'blur(6px)' },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
-  },
+const variantMap: Record<SectionVariant, Variants> = {
+  soft: sectionVariantsSoft,
+  medium: sectionVariants,
+  cinematic: sectionVariantsCinematic,
 }
 
 export function AnimatedSection({
@@ -25,14 +34,40 @@ export function AnimatedSection({
   delay = 0,
   once = true,
   as = 'section',
+  variant = 'medium',
+  viewportAmount,
+  stagger = false,
 }: AnimatedSectionProps) {
   const MotionTag = motion[as]
+  const baseVariants = variantMap[variant]
+
+  const computedVariants: Variants = stagger
+    ? {
+        hidden: baseVariants.hidden,
+        show: {
+          ...(typeof baseVariants.show === 'object' && baseVariants.show !== null
+            ? baseVariants.show
+            : {}),
+          transition: {
+            ...(typeof baseVariants.show === 'object' &&
+            baseVariants.show !== null &&
+            'transition' in baseVariants.show &&
+            typeof baseVariants.show.transition === 'object'
+              ? baseVariants.show.transition
+              : {}),
+            staggerChildren: 0.08,
+            delayChildren: 0.06,
+          },
+        },
+      }
+    : baseVariants
+
   return (
     <MotionTag
-      variants={variants}
+      variants={computedVariants}
       initial="hidden"
       whileInView="show"
-      viewport={{ once, amount: 0.15 }}
+      viewport={{ once, amount: viewportAmount ?? defaultViewport.amount }}
       transition={{ delay }}
       className={className}
     >
@@ -41,18 +76,5 @@ export function AnimatedSection({
   )
 }
 
-export const staggerContainer: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-}
-
-export const staggerItem: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-  },
-}
+export const staggerContainer: Variants = listStagger
+export const staggerItem: Variants = itemVariants

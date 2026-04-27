@@ -6,6 +6,15 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { CONTACT_LINKS, resume } from '../data/resume'
+import {
+  cinematicTransition,
+  durations,
+  itemVariants,
+  itemVariantsScale,
+  sectionVariantsCinematic,
+  springs,
+  viewport,
+} from '../motion'
 
 export function AboutPage() {
   return (
@@ -27,10 +36,10 @@ export function AboutPage() {
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            variants={sectionVariantsCinematic}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: viewport.once, amount: viewport.amount }}
             className="mt-12 rounded-3xl border border-border bg-card/80 p-8 text-lg leading-relaxed text-foreground shadow-xl backdrop-blur sm:p-12"
           >
             <p>{resume.summary}</p>
@@ -87,11 +96,13 @@ export function AboutPage() {
           {resume.education.map((ed, idx) => (
             <motion.div
               key={`${ed.degree}-${ed.period}`}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: viewport.once, amount: viewport.amount }}
+              transition={cinematicTransition(durations.medium, idx * 0.1)}
+              whileHover={{ y: -6, transition: springs.hover }}
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
             >
               <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-accent/10 blur-2xl transition-all group-hover:bg-accent/20" />
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
@@ -122,11 +133,13 @@ export function AboutPage() {
           {resume.certificates.map((cert, idx) => (
             <motion.div
               key={cert.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: idx * 0.08 }}
-              className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
+              variants={itemVariantsScale}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: viewport.once, amount: viewport.amount }}
+              transition={cinematicTransition(durations.base, idx * 0.08)}
+              whileHover={{ y: -5, transition: springs.hover }}
+              className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent">
                 <Award className="h-5 w-5" />

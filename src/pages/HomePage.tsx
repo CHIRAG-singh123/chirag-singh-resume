@@ -16,7 +16,7 @@ import { DownloadResumeButton } from '../components/DownloadResumeButton'
 import { GradientBlobs } from '../components/GradientBlobs'
 import { HeroAvatar } from '../components/HeroAvatar'
 import { PageTransition } from '../components/PageTransition'
-import { ProjectCard } from '../components/ProjectCard'
+import { ProjectCarousel } from '../components/ProjectCarousel'
 import { SectionHeading } from '../components/SectionHeading'
 import { StatCard } from '../components/StatCard'
 import { TypingText } from '../components/TypingText'
@@ -33,8 +33,6 @@ const PROJECT_GITHUB: Record<string, string> = {
 }
 
 export function HomePage() {
-  const featuredProjects = resume.projects.slice(0, 3)
-
   return (
     <PageTransition>
       <section className="relative overflow-hidden">
@@ -177,15 +175,8 @@ export function HomePage() {
           description="A glimpse into what I've built – from GANs and sentiment engines to full-stack platforms used in production."
         />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featuredProjects.map((project, idx) => (
-            <ProjectCard
-              key={project.name}
-              project={project}
-              index={idx}
-              githubUrl={PROJECT_GITHUB[project.name]}
-            />
-          ))}
+        <div className="mt-12">
+          <ProjectCarousel projects={resume.projects} githubMap={PROJECT_GITHUB} />
         </div>
 
         <div className="mt-10 flex justify-center">

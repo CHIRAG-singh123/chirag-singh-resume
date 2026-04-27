@@ -3320,6 +3320,73 @@ button:hover svg {
   border-color: var(--color-accent) !important;
 }
 
+/* ============================================
+   Reduced Motion Overrides (Accessibility)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html,
+  body {
+    scroll-behavior: auto !important;
+  }
+
+  .animate-gradient-shift,
+  .animate-float-slow,
+  .animate-float-slower,
+  .animate-pulse-ring,
+  .animate-spin-slow,
+  .animate-bounce,
+  .animate-pulse,
+  .animate-marquee,
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-shimmer,
+  .pulse-glow,
+  .float-animation,
+  .gradient-animated,
+  .skeleton-shimmer,
+  .skeleton-loading,
+  .skeleton-enhanced,
+  .loading-spinner,
+  .loading-pulse,
+  .icon-pulse,
+  .stagger-fade-in,
+  .stagger-item,
+  .wave-border-animation::before,
+  .wave-border-animation::after {
+    animation: none !important;
+  }
+
+  .light .fc-day-today .fc-daygrid-day-number,
+  .dark .fc-day-today .fc-daygrid-day-number {
+    animation: none !important;
+  }
+
+  button:not(:disabled):hover,
+  .hover-lift:hover,
+  .card-hover:hover,
+  .scale-hover:hover,
+  .rotate-hover:hover,
+  .button-press:active,
+  .button-enhanced:active {
+    transform: none !important;
+  }
+
+  .light .bg-red-500\/30,
+  .light [class*="bg-red-500\/30"] {
+    animation: none !important;
+  }
+}
+
 /* Select dropdown text in light mode */
 .light select.text-white {
   color: var(--color-foreground) !important;
