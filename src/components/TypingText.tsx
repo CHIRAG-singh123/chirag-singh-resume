@@ -10,8 +10,8 @@ interface TypingTextProps {
 
 export function TypingText({
   phrases,
-  typingSpeed = 70,
-  deletingSpeed = 35,
+  typingSpeed = 30,
+  deletingSpeed = 30,
   pauseMs = 1400,
   className,
 }: TypingTextProps) {

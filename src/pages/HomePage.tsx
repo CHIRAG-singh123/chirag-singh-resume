@@ -59,15 +59,15 @@ export function HomePage() {
 
             <motion.h1
               variants={staggerItem}
-              className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+              className="mt-6 font-display text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl"
             >
               Hi, I'm <span className="text-accent">{resume.personal.name.split(' ')[0]}</span>
               <br />
               <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift">
                 <TypingText
                   phrases={[
-                    'AI-Augmented Software Engineer',
-                    'Full-Stack Application Developer',
+                    'AI-Augmented Developer',
+                    'Flutter Developer',
                     'ML / GAN Enthusiast',
                     'MERN & Django Dev',
                   ]}
