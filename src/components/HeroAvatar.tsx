@@ -17,28 +17,19 @@ export function HeroAvatar() {
         aria-hidden="true"
       />
 
-      <motion.div
-        className="absolute inset-0 rounded-full border border-dashed border-accent/40"
-        animate={shouldReduceMotion ? undefined : { rotate: 360 }}
-        transition={
-          shouldReduceMotion
-            ? undefined
-            : { repeat: Infinity, duration: 28, ease: 'linear' }
-        }
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 rounded-full border border-dashed border-accent/40 will-change-transform motion-reduce:animate-none animate-[spin_28s_linear_infinite]"
       >
         <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-accent shadow-glow" />
-      </motion.div>
-      <motion.div
-        className="absolute inset-3 rounded-full border border-dashed border-accent-secondary/40"
-        animate={shouldReduceMotion ? undefined : { rotate: -360 }}
-        transition={
-          shouldReduceMotion
-            ? undefined
-            : { repeat: Infinity, duration: 22, ease: 'linear' }
-        }
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="absolute inset-3 rounded-full border border-dashed border-accent-secondary/40 will-change-transform motion-reduce:animate-none animate-[spin_22s_linear_infinite] [animation-direction:reverse]"
       >
         <span className="absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-accent-secondary shadow-glow-secondary" />
-      </motion.div>
+      </div>
 
       <div className="absolute inset-6 overflow-hidden rounded-full border border-border bg-card shadow-xl">
         <img
