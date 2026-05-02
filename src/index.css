@@ -165,6 +165,13 @@ button:disabled {
   pointer-events: none;
 }
 
+/* Back to top — was inside .relative layout; global `.relative button { position: relative }` broke fixed positioning */
+button.back-to-top-button {
+  position: fixed !important;
+  overflow: visible !important;
+  left: auto !important;
+}
+
 /* Ensure dropdown menus and their buttons are always clickable */
 [class*="z-"] button,
 [class*="z-\["] button {

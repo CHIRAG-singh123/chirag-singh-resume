@@ -28,7 +28,7 @@ export function ContactPage() {
     }
   }
 
-  const mailtoLink = () => {
+  const buildDraft = () => {
     const finalSubject = subject || `Hello from ${name || 'your site visitor'}`
     const bodyLines: string[] = []
     if (name) bodyLines.push(`Name: ${name}`)
@@ -37,12 +37,33 @@ export function ContactPage() {
       bodyLines.push('')
       bodyLines.push(body)
     }
+    return { finalSubject, bodyText: bodyLines.join('\n') }
+  }
+
+  const mailtoLink = () => {
+    const { finalSubject, bodyText } = buildDraft()
     const params = new URLSearchParams()
     params.set('subject', finalSubject)
-    if (bodyLines.length) params.set('body', bodyLines.join('\n'))
+    if (bodyText) params.set('body', bodyText)
     return `mailto:${resume.personal.email}?${params
       .toString()
       .replace(/\+/g, '%20')}`
+  }
+
+  const gmailComposeUrl = () => {
+    const { finalSubject, bodyText } = buildDraft()
+    const query = [
+      'view=cm',
+      'fs=1',
+      `to=${encodeURIComponent(resume.personal.email)}`,
+      `su=${encodeURIComponent(finalSubject)}`,
+    ]
+    if (bodyText) query.push(`body=${encodeURIComponent(bodyText)}`)
+    return `https://mail.google.com/mail/?${query.join('&')}`
+  }
+
+  const openCompose = () => {
+    window.open(gmailComposeUrl(), '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -61,7 +82,7 @@ export function ContactPage() {
                 </span>
               </>
             }
-            description="Reach out by phone, email, or send a quick message below. Clicking Email opens your default mail client (Outlook on Windows)."
+            description="Reach out by phone, email, or send a quick message below. The form opens Gmail in your browser with a pre-filled draft."
           />
         </div>
       </section>
@@ -134,7 +155,7 @@ export function ContactPage() {
                 href={CONTACT_LINKS.emailHref}
                 className="inline-flex items-center gap-2 rounded-full bg-hero-gradient bg-[length:200%_200%] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white shadow-glow animate-gradient-shift transition-transform hover:-translate-y-0.5"
               >
-                <Mail className="h-4 w-4" /> Open in Outlook
+                <Mail className="h-4 w-4" /> Open mail app
               </a>
               <button
                 type="button"
@@ -190,7 +211,7 @@ export function ContactPage() {
           viewport={{ once: viewport.once, amount: 0.15 }}
           onSubmit={(e) => {
             e.preventDefault()
-            window.location.href = mailtoLink()
+            openCompose()
           }}
           className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-xl sm:p-10"
         >
@@ -200,8 +221,8 @@ export function ContactPage() {
             Send a quick message
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Fill this in and hit Send. Your default mail app (Outlook on Windows) will open
-            pre-filled with your message.
+            Fill this in and hit Send. Gmail opens in a new tab with a pre-filled draft
+            addressed to me &mdash; review and send from your own account.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -252,7 +273,13 @@ export function ContactPage() {
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">
-              By sending, your default mail client opens with a pre-filled draft.
+              Opens Gmail compose in a new tab.{' '}
+              <a
+                href={mailtoLink()}
+                className="font-semibold text-foreground underline-offset-4 hover:underline"
+              >
+                Prefer your desktop mail app?
+              </a>
             </p>
             <div className="flex flex-wrap gap-3">
               <DownloadResumeButton variant="ghost" />
@@ -261,7 +288,7 @@ export function ContactPage() {
                 className="group inline-flex items-center gap-2 rounded-full bg-hero-gradient bg-[length:200%_200%] px-6 py-3 text-sm font-semibold text-white shadow-glow animate-gradient-shift transition-transform hover:-translate-y-0.5"
               >
                 <Mail className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
-                Send via Mail
+                Send via Gmail
               </button>
             </div>
           </div>
