@@ -2,8 +2,12 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { CONTACT_LINKS } from '../data/resume'
 import { durations, easings } from '../motion'
 
+const buildSrcSet = (sources: { src: string; width: number }[]) =>
+  sources.map((s) => `${s.src} ${s.width}w`).join(', ')
+
 export function HeroAvatar() {
   const shouldReduceMotion = useReducedMotion()
+  const portrait = CONTACT_LINKS.profileImage
 
   return (
     <motion.div
@@ -32,13 +36,28 @@ export function HeroAvatar() {
       </div>
 
       <div className="absolute inset-6 overflow-hidden rounded-full border border-border bg-card shadow-xl">
-        <img
-          src={CONTACT_LINKS.profileImage}
-          alt="Chirag Singh"
-          className="h-full w-full object-cover"
-          loading="eager"
-          decoding="async"
-        />
+        <picture>
+          <source
+            type="image/avif"
+            srcSet={buildSrcSet(portrait.avif)}
+            sizes={portrait.sizes}
+          />
+          <source
+            type="image/webp"
+            srcSet={buildSrcSet(portrait.webp)}
+            sizes={portrait.sizes}
+          />
+          <img
+            src={portrait.fallback}
+            alt={portrait.alt}
+            width={portrait.width}
+            height={portrait.height}
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        </picture>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-accent/10 via-transparent to-accent-secondary/20 mix-blend-overlay" />
       </div>
 

@@ -8,4 +8,29 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (id.includes('framer-motion')) return 'motion'
+          if (id.includes('react-router')) return 'router'
+          if (id.includes('lucide-react')) return 'icons'
+          if (
+            id.includes('react-dom') ||
+            id.includes('scheduler') ||
+            /\/react\//.test(id) ||
+            id.endsWith('/react')
+          ) {
+            return 'react'
+          }
+          return 'vendor'
+        },
+      },
+    },
+  },
 })

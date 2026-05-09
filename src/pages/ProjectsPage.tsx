@@ -5,7 +5,8 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { ProjectCard } from '../components/ProjectCard'
 import { SectionHeading } from '../components/SectionHeading'
-import { resume } from '../data/resume'
+import { PROJECT_LINKS, resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import { durations, easings, springs } from '../motion'
 
 const FEATURED_TAGS_PER_PROJECT = 2
@@ -31,17 +32,14 @@ const tagItemVariants: Variants = {
   },
 }
 
-const PROJECT_GITHUB: Record<string, string> = {
-  Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
-  'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
-  'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
-  'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',
-  'LJ Learning Platform': 'https://github.com/ayushpatel112233/Online-Learing-app',
-  'Rhythm Realm': 'https://github.com/CHIRAG-singh123/music-streamer-mern',
-  CustomerSync: 'https://github.com/CHIRAG-singh123/CRM',
-}
-
 export function ProjectsPage() {
+  useDocumentHead({
+    title: `Projects — ${resume.personal.name}`,
+    description:
+      'End-to-end work, from research to production: GANs, sentiment analysis, MERN platforms, and more.',
+    canonical: '/projects',
+  })
+
   const allTags = useMemo(() => {
     const set = new Set<string>()
     resume.projects.forEach((p) =>
@@ -157,7 +155,7 @@ export function ProjectsPage() {
                 <ProjectCard
                   project={project}
                   index={idx}
-                  githubUrl={PROJECT_GITHUB[project.name]}
+                  githubUrl={PROJECT_LINKS[project.name]}
                   disableReveal
                 />
               </motion.div>

@@ -1,7 +1,10 @@
 import { AnimatePresence, motion, useMotionTemplate, useMotionValue } from 'framer-motion'
 import { ArrowUpRight, ChevronDown, ExternalLink } from 'lucide-react'
 import { useEffect, useState, type MouseEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { GithubIcon } from './BrandIcons'
+import { projectSlug } from '../data/resume'
+import { prefetchRoute } from '../lib/routes/prefetch'
 import type { Project } from '../lib/resume/types'
 import {
   cinematicTransition,
@@ -74,7 +77,14 @@ export function ProjectCard({
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <h3 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            {project.name}
+            <Link
+              to={`/projects/${projectSlug(project.name)}`}
+              onMouseEnter={() => prefetchRoute('/projects')}
+              onFocus={() => prefetchRoute('/projects')}
+              className="rounded-sm transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {project.name}
+            </Link>
           </h3>
           <p className="mt-1 text-sm font-medium text-muted-foreground">{project.tagline}</p>
         </div>
@@ -93,9 +103,13 @@ export function ProjectCard({
             <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
           </motion.a>
         ) : (
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background transition-all duration-300 group-hover:border-accent group-hover:bg-accent group-hover:text-accent-foreground">
+          <Link
+            to={`/projects/${projectSlug(project.name)}`}
+            aria-label={`View ${project.name} details`}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background transition-all duration-300 group-hover:border-accent group-hover:bg-accent group-hover:text-accent-foreground"
+          >
             <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </span>
+          </Link>
         )}
       </div>
 

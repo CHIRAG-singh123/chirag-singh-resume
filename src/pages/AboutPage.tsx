@@ -6,6 +6,7 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { CONTACT_LINKS, resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import {
   cinematicTransition,
   durations,
@@ -17,6 +18,13 @@ import {
 } from '../motion'
 
 export function AboutPage() {
+  useDocumentHead({
+    title: `About — ${resume.personal.name}`,
+    description: `Learn more about ${resume.personal.name}: education at LJ University, certifications, and the values behind the work.`,
+    canonical: '/about',
+    type: 'profile',
+  })
+
   return (
     <PageTransition>
       <section className="relative overflow-hidden">

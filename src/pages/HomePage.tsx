@@ -20,19 +20,16 @@ import { ProjectCarousel } from '../components/ProjectCarousel'
 import { SectionHeading } from '../components/SectionHeading'
 import { StatCard } from '../components/StatCard'
 import { TypingText } from '../components/TypingText'
-import { CONTACT_LINKS, resume } from '../data/resume'
-
-const PROJECT_GITHUB: Record<string, string> = {
-  Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
-  'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
-  'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
-  'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',
-  'LJ Learning Platform': 'https://github.com/ayushpatel112233/Online-Learing-app',
-  'Rhythm Realm': 'https://github.com/CHIRAG-singh123/music-streamer-mern',
-  CustomerSync: 'https://github.com/CHIRAG-singh123/CRM',
-}
+import { CONTACT_LINKS, PROJECT_LINKS, resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 
 export function HomePage() {
+  useDocumentHead({
+    title: `${resume.personal.name} — ${resume.personal.title}`,
+    description: resume.summary,
+    canonical: '/',
+  })
+
   return (
     <PageTransition>
       <section className="relative overflow-hidden">
@@ -176,7 +173,7 @@ export function HomePage() {
         />
 
         <div className="mt-12">
-          <ProjectCarousel projects={resume.projects} githubMap={PROJECT_GITHUB} />
+          <ProjectCarousel projects={resume.projects} githubMap={PROJECT_LINKS} />
         </div>
 
         <div className="mt-10 flex justify-center">

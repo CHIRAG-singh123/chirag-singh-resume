@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Command as CommandIcon, Menu, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { resume } from '../data/resume'
+import { prefetchRoute } from '../lib/routes/prefetch'
 import { durations, easings, springs } from '../motion'
+import { useOpenCommandPalette } from './CommandPalette'
 import { ThemeToggle } from './ThemeToggle'
 
 interface NavLinkDef {
@@ -21,10 +23,15 @@ const NAV_LINKS: NavLinkDef[] = [
   { to: '/contact', label: 'Contact' },
 ]
 
+const isMac =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const openPalette = useOpenCommandPalette()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 16)
@@ -37,10 +44,30 @@ export function Navbar() {
     setOpen(false)
   }, [location.pathname])
 
+  // Close mobile menu on Escape and return focus to its toggle.
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setOpen(false)
+        toggleRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   const initials = resume.personal.name
     .split(' ')
     .map((part) => part[0])
     .join('')
+
+  const linkPrefetch = (to: string) => ({
+    onMouseEnter: () => prefetchRoute(to),
+    onFocus: () => prefetchRoute(to),
+    onTouchStart: () => prefetchRoute(to),
+  })
 
   return (
     <motion.header
@@ -53,8 +80,11 @@ export function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <NavLink to="/" className="group flex items-center gap-3">
+      <nav
+        className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+        aria-label="Primary"
+      >
+        <NavLink to="/" className="group flex items-center gap-3" {...linkPrefetch('/')}>
           <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-hero-gradient bg-[length:200%_200%] animate-gradient-shift font-display font-bold text-white shadow-md">
             <span className="relative z-10 text-sm tracking-widest">{initials}</span>
             <span className="absolute inset-0 bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
@@ -75,6 +105,7 @@ export function Navbar() {
               <NavLink
                 to={link.to}
                 end={link.end}
+                {...linkPrefetch(link.to)}
                 className={({ isActive }) =>
                   `relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
@@ -101,11 +132,24 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           <button
             type="button"
+            onClick={openPalette}
+            className="hidden items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground md:inline-flex"
+            aria-label="Open command palette"
+            title="Open command palette"
+          >
+            <CommandIcon className="h-3.5 w-3.5" />
+            <span>{isMac ? '⌘' : 'Ctrl'} K</span>
+          </button>
+          <ThemeToggle />
+          <button
+            ref={toggleRef}
+            type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/70 text-foreground md:hidden"
-            aria-label="Toggle navigation"
+            aria-label={open ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={open}
+            aria-controls="primary-mobile-nav"
             onClick={() => setOpen((prev) => !prev)}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -116,6 +160,7 @@ export function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
+            id="primary-mobile-nav"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -133,6 +178,7 @@ export function Navbar() {
                   <NavLink
                     to={link.to}
                     end={link.end}
+                    {...linkPrefetch(link.to)}
                     className={({ isActive }) =>
                       `block rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                         isActive
@@ -145,6 +191,21 @@ export function Navbar() {
                   </NavLink>
                 </motion.li>
               ))}
+              <li className="mt-2">
+                <button
+                  type="button"
+                  onClick={openPalette}
+                  className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-card/70 px-4 py-3 text-sm font-medium text-foreground"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <CommandIcon className="h-4 w-4 text-accent" />
+                    Quick search
+                  </span>
+                  <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                    {isMac ? '⌘ K' : 'Ctrl K'}
+                  </span>
+                </button>
+              </li>
             </ul>
           </motion.div>
         )}

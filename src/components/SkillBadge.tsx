@@ -6,6 +6,7 @@ interface SkillBadgeProps {
   delay?: number
 }
 
+/** Static skill chip for category cards — orbit tooltips live only on {@link SkillConstellation}. */
 export function SkillBadge({ label, delay = 0 }: SkillBadgeProps) {
   return (
     <motion.span

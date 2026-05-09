@@ -9,9 +9,17 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { CONTACT_LINKS, resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import { sectionVariantsCinematic, springs, viewport } from '../motion'
 
 export function ContactPage() {
+  useDocumentHead({
+    title: `Contact — ${resume.personal.name}`,
+    description:
+      "Phone, email, LinkedIn, GitHub, or send a quick message — I'll get back within a day.",
+    canonical: '/contact',
+  })
+
   const [name, setName] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [subject, setSubject] = useState('')

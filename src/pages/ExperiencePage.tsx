@@ -6,9 +6,17 @@ import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { TimelineItem } from '../components/TimelineItem'
 import { resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import { cinematicTransition, distances, durations, springs, viewport } from '../motion'
 
 export function ExperiencePage() {
+  useDocumentHead({
+    title: `Experience — ${resume.personal.name}`,
+    description:
+      'A timeline of hands-on work shipping AI-enabled platforms and full-stack systems.',
+    canonical: '/experience',
+  })
+
   return (
     <PageTransition>
       <section className="relative overflow-hidden">

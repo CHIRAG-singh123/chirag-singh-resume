@@ -179,12 +179,50 @@ export const resume: ResumeData = {
   ],
 }
 
+/**
+ * Public GitHub repos / external links per project, keyed by `Project.name`.
+ * Centralized here so HomePage, ProjectsPage, ProjectDetailPage, and the
+ * command palette stay in sync.
+ */
+export const PROJECT_LINKS: Record<string, string> = {
+  Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
+  'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
+  'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
+  'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',
+  'LJ Learning Platform': 'https://github.com/ayushpatel112233/Online-Learing-app',
+  'Rhythm Realm': 'https://github.com/CHIRAG-singh123/music-streamer-mern',
+  CustomerSync: 'https://github.com/CHIRAG-singh123/CRM',
+}
+
+export function projectSlug(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 export const CONTACT_LINKS = {
   phoneHref: `tel:${resume.personal.phone.replace(/\s+/g, '')}`,
   emailHref: `mailto:${resume.personal.email}`,
   githubHref: resume.personal.githubUrl,
   linkedinHref: resume.personal.linkedinUrl,
   resumeHref: '/CHIRAG_SINGH_FINAL.pdf',
-  profileImage: '/Image/Profile.png',
+  profileImage: {
+    fallback: '/Image/Profile-640.png',
+    avif: [
+      { src: '/Image/Profile-320.avif', width: 320 },
+      { src: '/Image/Profile-640.avif', width: 640 },
+      { src: '/Image/Profile-960.avif', width: 960 },
+    ],
+    webp: [
+      { src: '/Image/Profile-320.webp', width: 320 },
+      { src: '/Image/Profile-640.webp', width: 640 },
+      { src: '/Image/Profile-960.webp', width: 960 },
+    ],
+    sizes: '(min-width: 1024px) 22rem, (min-width: 640px) 20rem, 16rem',
+    width: 640,
+    height: 640,
+    alt: 'Chirag Singh',
+  },
   courseraHref: 'https://www.coursera.org/learner/chiragsingh',
 }

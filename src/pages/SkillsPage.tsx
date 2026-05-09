@@ -6,7 +6,9 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { SkillBadge } from '../components/SkillBadge'
+import { SkillConstellation } from '../components/SkillConstellation'
 import { resume } from '../data/resume'
+import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import {
   cinematicTransition,
   durations,
@@ -24,9 +26,16 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 }
 
 export function SkillsPage() {
+  useDocumentHead({
+    title: `Skills — ${resume.personal.name}`,
+    description:
+      'A versatile stack spanning AI/ML frameworks, full-stack web development, and modern tooling.',
+    canonical: '/skills',
+  })
+
   return (
     <PageTransition>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-x-hidden overflow-y-visible">
         <GradientBlobs variant="soft" />
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
@@ -35,13 +44,17 @@ export function SkillsPage() {
               <>
                 A versatile stack for
                 <br />
-                <span className="bg-hero-gradient bg-clip-text text-transparent">
+                <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text font-bold tracking-tight text-transparent animate-gradient-shift">
                   AI + full-stack builds
                 </span>
               </>
             }
             description="From language fundamentals to deep-learning frameworks – the tools I reach for to ship products."
           />
+
+          <div className="mt-14">
+            <SkillConstellation groups={resume.skills} />
+          </div>
         </div>
       </section>
 
@@ -92,7 +105,14 @@ export function SkillsPage() {
           <div className="absolute inset-0 -z-10 bg-hero-gradient bg-[length:200%_200%] opacity-10 animate-gradient-shift" />
           <SectionHeading
             eyebrow="Signature strengths"
-            title="Specialties I lean into"
+            title={
+              <>
+                Specialties I{' '}
+                <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text font-bold tracking-tight text-transparent animate-gradient-shift">
+                  lean into
+                </span>
+              </>
+            }
             description="Themes that show up repeatedly across my projects."
           />
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -117,7 +137,7 @@ export function SkillsPage() {
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
                   <Cpu className="h-4 w-4" />
                 </span>
-                <p className="mt-3 font-display text-base font-semibold text-foreground">
+                <p className="mt-3 font-display text-base font-bold tracking-tight text-foreground">
                   {item}
                 </p>
               </motion.div>

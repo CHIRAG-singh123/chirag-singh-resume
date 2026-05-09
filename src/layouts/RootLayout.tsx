@@ -2,37 +2,33 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { AnimatedOutlet } from '../components/AnimatedOutlet'
 import { BackToTop } from '../components/BackToTop'
+import { CommandPalette } from '../components/CommandPalette'
 import { Footer } from '../components/Footer'
 import { Navbar } from '../components/Navbar'
 import { ScrollProgress } from '../components/ScrollProgress'
-
-const ROUTE_TITLES: Record<string, string> = {
-  '/': 'Chirag Singh — AI-Augmented Software Engineer',
-  '/about': 'About — Chirag Singh',
-  '/skills': 'Skills — Chirag Singh',
-  '/projects': 'Projects — Chirag Singh',
-  '/experience': 'Experience — Chirag Singh',
-  '/contact': 'Contact — Chirag Singh',
-}
+import { PersonJsonLd } from '../lib/seo/JsonLd'
 
 export function RootLayout() {
   const location = useLocation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title =
-      ROUTE_TITLES[location.pathname] ?? 'Chirag Singh — AI-Augmented Software Engineer'
   }, [location.pathname])
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <PersonJsonLd />
       <ScrollProgress />
       <Navbar />
-      <main className="relative">
+      <main id="main-content" tabIndex={-1} className="relative">
         <AnimatedOutlet />
       </main>
       <Footer />
       <BackToTop />
+      <CommandPalette />
     </div>
   )
 }
