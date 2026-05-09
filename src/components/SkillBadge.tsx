@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { durations, easings, springs } from '../motion'
+import { SkillBrandMark } from './SkillBrandMark'
 
 interface SkillBadgeProps {
   label: string
@@ -18,7 +19,13 @@ export function SkillBadge({ label, delay = 0 }: SkillBadgeProps) {
       whileTap={{ scale: 0.97, transition: springs.tap }}
       className="group relative inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur transition-colors hover:border-accent/60 hover:bg-accent/10"
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-accent transition-transform group-hover:scale-150" />
+      <SkillBrandMark
+        label={label}
+        className="h-[18px] w-[18px] shrink-0"
+        fallback={
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent transition-transform group-hover:scale-150" />
+        }
+      />
       {label}
     </motion.span>
   )

@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Robotic chatbot">
+  <!-- Mechanical service-droid — paint order: body → details → antenna on top -->
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d1d9e3"/>
+      <stop offset="0.35" stop-color="#94a3b8"/>
+      <stop offset="0.7" stop-color="#64748b"/>
+      <stop offset="1" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="metalDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#526077"/>
+      <stop offset="1" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="lensGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="0.4" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <radialGradient id="bolt" cx="35%" cy="35%" r="65%">
+      <stop offset="0" stop-color="#e2e8f0"/>
+      <stop offset="0.6" stop-color="#94a3b8"/>
+      <stop offset="1" stop-color="#475569"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Main head chassis -->
+  <path
+    fill="url(#metal)"
+    stroke="#334155"
+    stroke-width="12"
+    stroke-linejoin="round"
+    d="
+      M 112 132
+      H 400
+      Q 432 132 438 166
+      V 384
+      Q 438 418 400 424
+      H 112
+      Q 74 418 74 384
+      V 166
+      Q 80 132 112 132
+      Z"
+  />
+
+  <!-- Side sensor pods -->
+  <ellipse cx="76" cy="268" rx="38" ry="52" fill="url(#metalDark)" stroke="#1e293b" stroke-width="8"/>
+  <ellipse cx="436" cy="268" rx="38" ry="52" fill="url(#metalDark)" stroke="#1e293b" stroke-width="8"/>
+  <ellipse cx="76" cy="268" rx="22" ry="36" fill="#1e293b"/>
+  <ellipse cx="436" cy="268" rx="22" ry="36" fill="#1e293b"/>
+  <circle cx="76" cy="274" r="14" fill="#334155" stroke="#cbd5e1" stroke-width="7"/>
+  <circle cx="436" cy="274" r="14" fill="#334155" stroke="#cbd5e1" stroke-width="7"/>
+
+  <!-- Brow / helmet ridge -->
+  <path
+    fill="#64748b"
+    stroke="#475569"
+    stroke-width="8"
+    d="M 118 168 H 394 L 382 198 H 130 Z"
+  />
+
+  <!-- Forehead status LEDs -->
+  <circle cx="174" cy="218" r="14" fill="#22c55e"/>
+  <circle cx="256" cy="210" r="14" fill="#eab308"/>
+  <circle cx="338" cy="218" r="14" fill="#475569"/>
+
+  <!-- Inner face panel -->
+  <rect x="118" y="238" width="276" height="174" rx="42" fill="url(#visor)" stroke="#020617" stroke-opacity="0.55" stroke-width="10"/>
+
+  <!-- Cheek cooling vents -->
+  <g stroke="#64748b" stroke-width="10" stroke-linecap="round">
+    <line x1="126" y1="306" x2="156" y2="306"/>
+    <line x1="126" y1="328" x2="156" y2="328"/>
+    <line x1="126" y1="350" x2="156" y2="350"/>
+    <line x1="356" y1="306" x2="386" y2="306"/>
+    <line x1="356" y1="328" x2="386" y2="328"/>
+    <line x1="356" y1="350" x2="386" y2="350"/>
+  </g>
+
+  <!-- Eye lens bezels + glow -->
+  <circle cx="206" cy="318" r="62" fill="#334155" stroke="#cbd5e1" stroke-width="14"/>
+  <circle cx="306" cy="318" r="62" fill="#334155" stroke="#cbd5e1" stroke-width="14"/>
+  <circle cx="206" cy="318" r="46" fill="#020617"/>
+  <circle cx="306" cy="318" r="46" fill="#020617"/>
+  <circle cx="214" cy="310" r="34" fill="url(#lensGlow)"/>
+  <circle cx="314" cy="310" r="34" fill="url(#lensGlow)"/>
+  <ellipse cx="234" cy="294" rx="13" ry="10" fill="#f8fafc" opacity="0.92"/>
+  <ellipse cx="334" cy="294" rx="13" ry="10" fill="#f8fafc" opacity="0.92"/>
+
+  <!-- Speaker grille (voice / chatbot) -->
+  <rect x="168" y="388" width="176" height="30" rx="15" fill="#1e293b" stroke="#64748b" stroke-width="10"/>
+  <line x1="186" y1="400" x2="326" y2="400" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+  <line x1="186" y1="414" x2="302" y2="414" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Chin plate + bolts -->
+  <path d="M 176 432 H 336 L 322 460 H 190 Z" fill="#64748b" stroke="#475569" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="210" cy="452" r="18" fill="url(#bolt)" stroke="#334155" stroke-width="6"/>
+  <circle cx="302" cy="452" r="18" fill="url(#bolt)" stroke="#334155" stroke-width="6"/>
+  <path d="M 210 440 v 24 M 198 452 h 24" stroke="#64748b" stroke-width="6"/>
+  <path d="M 302 440 v 24 M 290 452 h 24" stroke="#64748b" stroke-width="6"/>
+
+  <!-- Neck joint -->
+  <rect x="228" y="458" width="56" height="44" rx="14" fill="url(#metalDark)" stroke="#334155" stroke-width="8"/>
+
+  <!-- Antenna (on top of helmet) -->
+  <line x1="256" y1="40" x2="256" y2="128" stroke="#64748b" stroke-width="28" stroke-linecap="round"/>
+  <rect x="244" y="98" width="24" height="36" rx="6" fill="#475569"/>
+  <circle cx="256" cy="128" r="22" fill="#94a3b8" stroke="#475569" stroke-width="8"/>
+  <circle cx="256" cy="34" r="28" fill="url(#metal)"/>
+  <circle cx="256" cy="34" r="17" fill="#f97316"/>
+  <ellipse cx="247" cy="24" rx="9" ry="7" fill="#ffedd5" opacity="0.88"/>
+</svg>

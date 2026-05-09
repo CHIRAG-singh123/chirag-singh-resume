@@ -3,10 +3,11 @@
  *
  * Inventory (normalized key → source):
  * - si: python, javascript, php, django, angular, laravel, tensorflow, keras,
- *       scikit-learn, nlp, machine learning (Jupyter), computer vision (OpenCV),
- *       api integration (Postman), responsive web design (CSS), git, opencv, numpy,
+ *       scikit-learn, nlp, machine learning (Jupyter),
+ *       responsive web design (CSS), git, opencv (OpenCV), numpy,
  *       tqdm, gans (NVIDIA), imageio (ImageJ), mern (MongoDB for MERN stack label).
- * - svgRaster (official / multi-color, public/Image/**): matplotlib, java.
+ * - svgRaster (official / multi-color, custom public/Image/**): matplotlib, java,
+ *       api integration (robotic-chatbot mascot), computer vision (Image/computer-vision.svg).
  * - neuralNet: deep learning (inline MLP diagram — readable at icon size, no orbit tilt issues).
  *
  * Trademark / license: vendor headers on SVGs under public/Image/brands/.
@@ -27,7 +28,6 @@ import {
   siNvidia,
   siOpencv,
   siPhp,
-  siPostman,
   siPython,
   siScikitlearn,
   siSpacy,
@@ -65,9 +65,6 @@ const BRAND_BY_KEY: Record<string, SimpleIcon> = {
 
   nlp: siSpacy,
   'machine learning': siJupyter,
-  /** OpenCV is the standard CV stack mark; Hugging Face was misleading here. */
-  'computer vision': siOpencv,
-  'api integration': siPostman,
   'responsive web design': siCss,
   git: siGit,
 
@@ -100,6 +97,16 @@ const SVG_RASTER: Record<
     relativePath: 'Image/brands/java.svg',
     alt: 'Java',
     viewBox: '0 0 128 128',
+  },
+  'api integration': {
+    relativePath: 'Image/API-Intigration.svg',
+    alt: 'API Integration',
+    viewBox: '0 0 512 512',
+  },
+  'computer vision': {
+    relativePath: 'Image/computer-vision.svg',
+    alt: 'Computer vision',
+    viewBox: '0 0 512 512',
   },
 }
 

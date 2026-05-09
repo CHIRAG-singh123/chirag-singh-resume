@@ -20,6 +20,7 @@ import {
   type SVGProps,
 } from 'react'
 import type { SkillGroup } from '../lib/resume/types'
+/** Orbit glyphs: normalized labels map in {@link ../lib/skillBrandIcons} — e.g. OpenCV ≠ Computer Vision. */
 import { getBrandIcon } from '../lib/skillBrandIcons'
 import { TypingText } from './TypingText'
 import { siFillRelativeLuminance, siGlyphNeedsLightBackdrop } from '../lib/siGlyphVisibility'
@@ -80,7 +81,10 @@ function SimpleIconGlyph({ xOffset, yOffset, size, path, hex }: SimpleIconGlyphP
   )
 }
 
-/** Light inner pad + fixed 24×24 slot for multi-color SVGs (matplotlib, Java) on dark chips. */
+/**
+ * Multi-color / complex SVGs from `public/` (matplotlib, Java, custom API art).
+ * Uses HTML `<img>` inside `foreignObject` — nested SVG `<image href="*.svg">` often fails to paint.
+ */
 function BrandRasterGlyph({
   xOffset,
   yOffset,
@@ -106,14 +110,34 @@ function BrandRasterGlyph({
     >
       <title>{alt}</title>
       <circle cx={12} cy={12} r={10.75} fill="#f4f6fa" opacity={0.98} />
-      <image
-        href={src}
-        x={2}
-        y={2}
-        width={20}
-        height={20}
-        preserveAspectRatio="xMidYMid meet"
-      />
+      <foreignObject x={2} y={2} width={20} height={20} pointerEvents="none">
+        <div
+          style={{
+            display: 'flex',
+            width: '100%',
+            height: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          // @ts-expect-error — valid on foreignObject HTML wrapper
+          xmlns="http://www.w3.org/1999/xhtml"
+        >
+          <img
+            src={src}
+            alt=""
+            draggable={false}
+            decoding="async"
+            style={{
+              width: '100%',
+              height: '100%',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              objectFit: 'contain',
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      </foreignObject>
     </svg>
   )
 }

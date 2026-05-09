@@ -6,6 +6,7 @@ import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { SkillBadge } from '../components/SkillBadge'
+import { SkillBrandMark } from '../components/SkillBrandMark'
 import { SkillConstellation } from '../components/SkillConstellation'
 import { resume } from '../data/resume'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
@@ -135,7 +136,7 @@ export function SkillsPage() {
                 className="rounded-2xl border border-border bg-background/80 p-5 backdrop-blur transition-[border-color,box-shadow] duration-300 hover:border-accent/50"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
-                  <Cpu className="h-4 w-4" />
+                  <SkillBrandMark label={item} className="h-5 w-5" fallback={<Cpu className="h-4 w-4" />} />
                 </span>
                 <p className="mt-3 font-display text-base font-bold tracking-tight text-foreground">
                   {item}
