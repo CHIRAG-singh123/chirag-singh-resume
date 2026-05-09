@@ -1,11 +1,13 @@
 // Generates responsive AVIF / WebP / PNG variants of the hero portrait
-// once at build/dev time. Run with `npm run images`.
+// once at build/dev time. Run with `npm run images` after replacing
+// public/Image/Profile.png.
 //
-// Source : public/Image/Profile.png (5 MB PNG)
+// Source : public/Image/Profile.png
 // Output : public/Image/Profile-{320,640,960}.{avif,webp,png}
 //
-// Each variant is square (the avatar circle clips it). 320 px covers
-// mobile, 640 px covers retina mobile / desktop, 960 px covers HiDPI.
+// Each variant is square (the hero avatar circle uses object-cover). Crop uses
+// Sharp's attention strategy so the face stays centered when the source is
+// portrait or has extra headroom. `.rotate()` applies EXIF orientation first.
 
 import { mkdir, stat } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
@@ -41,8 +43,9 @@ async function main() {
   for (const width of WIDTHS) {
     for (const { ext, encoder } of FORMATS) {
       const outPath = join(OUT_DIR, `Profile-${width}.${ext}`)
-      // Use Sharp's smart crop to keep the face centered for square avatars.
-      const pipeline = sharp(SRC).resize(width, width, { fit: 'cover', position: 'attention' })
+      const pipeline = sharp(SRC)
+        .rotate() // honor EXIF orientation from cameras / phones
+        .resize(width, width, { fit: 'cover', position: sharp.strategy.attention })
       tasks.push(
         encoder(pipeline)
           .toFile(outPath)
