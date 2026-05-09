@@ -41,7 +41,8 @@ async function main() {
   for (const width of WIDTHS) {
     for (const { ext, encoder } of FORMATS) {
       const outPath = join(OUT_DIR, `Profile-${width}.${ext}`)
-      const pipeline = sharp(SRC).resize(width, width, { fit: 'cover' })
+      // Use Sharp's smart crop to keep the face centered for square avatars.
+      const pipeline = sharp(SRC).resize(width, width, { fit: 'cover', position: 'attention' })
       tasks.push(
         encoder(pipeline)
           .toFile(outPath)
