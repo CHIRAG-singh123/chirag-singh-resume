@@ -29,7 +29,9 @@ export const resume: ResumeData = {
       items: [
         'Django',
         'MERN (MongoDB, Express.js, React, Node.js)',
+        'React',
         'Angular',
+        'Flutter',
         'Laravel',
         'TensorFlow',
         'Keras',
@@ -46,6 +48,7 @@ export const resume: ResumeData = {
         'GANs',
         'API Integration',
         'Responsive Web Design',
+        'Production-ready UIs',
         'Git',
       ],
     },

@@ -1,74 +1,75 @@
 import type { ReactNode } from 'react'
-import { getBrandIcon } from '../lib/skillBrandIcons'
-import { siFillRelativeLuminance, siGlyphNeedsLightBackdrop } from '../lib/siGlyphVisibility'
+import { ComputerVisionEyeGlyph } from './ComputerVisionEyeGlyph'
+import { DeepLearningBrainGlyph } from './DeepLearningBrainGlyph'
+import { GanNeuralGlyph } from './GanNeuralGlyph'
+import { ImageIoGlyph } from './ImageIoGlyph'
+import { TqdmGlyph } from './TqdmGlyph'
+import { getSkillIcon } from '../lib/skillBrandIcons'
 
-/** Inline brand glyph for chips — mirrors constellation semantics (including light SI backdrops). */
+const SIZE_MORE = 1.4
+/** Match orbit devicon size so chips and ring marks look consistent. */
+const DEVICON_FONT_PX = Math.round(15 * 1.45 * SIZE_MORE)
+
+/** Inline tech glyph for chips — matches constellation devicon mapping. */
 export function SkillBrandMark({
   label,
   fallback,
-  className = 'h-[18px] w-[18px] shrink-0',
+  className = 'h-9 w-9 shrink-0',
 }: {
   label: string
   fallback?: ReactNode
-  /** Container for the mark (SVG / img sizing). */
+  /** Container for the mark (sizing). */
   className?: string
 }) {
-  const brand = getBrandIcon(label)
-  if (!brand) return fallback ?? null
+  const glyph = getSkillIcon(label)
+  if (!glyph) return fallback ?? null
 
-  if (brand.kind === 'si') {
-    const L = siFillRelativeLuminance(brand.hex)
-    const backdrop = siGlyphNeedsLightBackdrop(L)
+  if (glyph.kind === 'ganNeural') {
     return (
-      <span className={`inline-flex items-center justify-center ${className}`}>
-        <svg viewBox="0 0 24 24" className="h-full w-full" aria-hidden>
-          {backdrop ? <circle cx={12} cy={12} r={10} fill="#f4f6fa" opacity={0.97} /> : null}
-          <path fill={`#${brand.hex}`} d={brand.path} />
-        </svg>
+      <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+        <GanNeuralGlyph className="h-full w-full" />
       </span>
     )
   }
 
-  if (brand.kind === 'svgRaster') {
+  if (glyph.kind === 'tqdmLogo') {
     return (
-      <span
-        className={`inline-flex items-center justify-center overflow-hidden rounded-md border border-border bg-[#f4f6fa] p-px ${className}`}
-      >
-        <img
-          src={brand.src}
-          alt=""
-          draggable={false}
-          decoding="async"
-          className="h-full w-full object-contain"
-        />
+      <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+        <TqdmGlyph className="h-full w-full" />
       </span>
     )
   }
 
-  const sw = 0.65
+  if (glyph.kind === 'deepLearningBrain') {
+    return (
+      <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+        <DeepLearningBrainGlyph className="h-full w-full" />
+      </span>
+    )
+  }
+
+  if (glyph.kind === 'computerVisionEye') {
+    return (
+      <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+        <ComputerVisionEyeGlyph className="h-full w-full" />
+      </span>
+    )
+  }
+
+  if (glyph.kind === 'imageIoGlyph') {
+    return (
+      <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+        <ImageIoGlyph className="h-full w-full" />
+      </span>
+    )
+  }
+
   return (
-    <span className={`inline-flex items-center justify-center ${className}`}>
-      <svg viewBox="0 0 24 24" className="h-full w-full text-muted-foreground" aria-hidden>
-        <g stroke="currentColor" strokeWidth={sw} strokeLinecap="round" opacity={0.65} fill="none">
-          <line x1="5" y1="7.2" x2="11.85" y2="9.1" />
-          <line x1="5" y1="7.2" x2="11.85" y2="14.9" />
-          <line x1="5" y1="12" x2="11.85" y2="9.1" />
-          <line x1="5" y1="12" x2="11.85" y2="14.9" />
-          <line x1="5" y1="16.8" x2="11.85" y2="9.1" />
-          <line x1="5" y1="16.8" x2="11.85" y2="14.9" />
-          <line x1="12.15" y1="9.1" x2="19" y2="10" />
-          <line x1="12.15" y1="9.1" x2="19" y2="14" />
-          <line x1="12.15" y1="14.9" x2="19" y2="10" />
-          <line x1="12.15" y1="14.9" x2="19" y2="14" />
-        </g>
-        <circle cx="5" cy="7.2" r="2.05" fill="var(--color-chart-primary)" opacity={0.95} />
-        <circle cx="5" cy="12" r="2.05" fill="var(--color-chart-secondary)" opacity={0.95} />
-        <circle cx="5" cy="16.8" r="2.05" fill="var(--color-chart-tertiary)" opacity={0.95} />
-        <circle cx="12" cy="9.1" r="2.35" fill="var(--color-accent)" opacity={0.92} />
-        <circle cx="12" cy="14.9" r="2.35" fill="var(--color-accent-secondary)" opacity={0.92} />
-        <circle cx="19" cy="10" r="2.1" fill="var(--color-chart-primary)" opacity={0.95} />
-        <circle cx="19" cy="14" r="2.1" fill="var(--color-chart-secondary)" opacity={0.95} />
-      </svg>
+    <span className={`inline-flex items-center justify-center ${className}`} aria-hidden>
+      <i
+        className={`${glyph.iconClass} colored skill-ion-lift`}
+        style={{ fontSize: DEVICON_FONT_PX, lineHeight: 1 }}
+      />
     </span>
   )
 }

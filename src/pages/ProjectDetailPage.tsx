@@ -10,6 +10,7 @@ import {
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { GithubIcon } from '../components/BrandIcons'
+import { ProjectStackChip } from '../components/ProjectStackChip'
 import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
@@ -117,12 +118,7 @@ export function ProjectDetailPage() {
               </h3>
               <div className="mt-4 flex flex-wrap gap-2">
                 {project.stack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                  >
-                    {tech}
-                  </span>
+                  <ProjectStackChip key={tech} label={tech} />
                 ))}
               </div>
             </div>

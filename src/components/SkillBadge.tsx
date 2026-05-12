@@ -7,7 +7,7 @@ interface SkillBadgeProps {
   delay?: number
 }
 
-/** Static skill chip for category cards — orbit tooltips live only on {@link SkillConstellation}. */
+/** Skill chip in category cards — uses {@link SkillBrandMark} / `getSkillIcon` (same mapping as the orbit). */
 export function SkillBadge({ label, delay = 0 }: SkillBadgeProps) {
   return (
     <motion.span
@@ -21,7 +21,7 @@ export function SkillBadge({ label, delay = 0 }: SkillBadgeProps) {
     >
       <SkillBrandMark
         label={label}
-        className="h-[18px] w-[18px] shrink-0"
+        className="h-9 w-9 shrink-0"
         fallback={
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent transition-transform group-hover:scale-150" />
         }
