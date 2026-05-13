@@ -7,7 +7,11 @@ type Loader = () => Promise<unknown>
 export const ROUTE_PREFETCHERS: Record<string, Loader> = {
   '/': () => import('../../pages/HomePage'),
   '/about': () => import('../../pages/AboutPage'),
-  '/skills': () => import('../../pages/SkillsPage'),
+  '/skills': () =>
+    Promise.all([
+      import('../../pages/SkillsPage'),
+      import('../../components/SkillConstellation'),
+    ]).then(() => undefined),
   '/projects': () => import('../../pages/ProjectsPage'),
   '/experience': () => import('../../pages/ExperiencePage'),
   '/contact': () => import('../../pages/ContactPage'),

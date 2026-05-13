@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion'
 import { Boxes, Code2, Cpu, Wrench } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { lazy, Suspense, useEffect } from 'react'
 import { AnimatedSection } from '../components/AnimatedSection'
 import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { SkillBadge } from '../components/SkillBadge'
 import { SkillBrandMark } from '../components/SkillBrandMark'
-import { SkillConstellation } from '../components/SkillConstellation'
 import { resume } from '../data/resume'
+import { ensureDeviconsCssLoaded } from '../lib/loadDeviconCss'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
+import { usePerfProfile } from '../lib/usePerfProfile'
 import {
   cinematicTransition,
   durations,
@@ -19,6 +21,10 @@ import {
   viewport,
 } from '../motion'
 
+const SkillConstellation = lazy(() =>
+  import('../components/SkillConstellation').then((m) => ({ default: m.SkillConstellation })),
+)
+
 const GROUP_ICONS: Record<string, LucideIcon> = {
   Languages: Code2,
   Frameworks: Boxes,
@@ -26,7 +32,18 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Tools: Wrench,
 }
 
+function ConstellationFallback() {
+  return (
+    <div
+      className="mx-auto aspect-square w-full max-w-[640px] rounded-2xl bg-muted/30"
+      aria-hidden
+    />
+  )
+}
+
 export function SkillsPage() {
+  const { coarseEffects } = usePerfProfile()
+
   useDocumentHead({
     title: `Skills — ${resume.personal.name}`,
     description:
@@ -34,10 +51,14 @@ export function SkillsPage() {
     canonical: '/skills',
   })
 
+  useEffect(() => {
+    void ensureDeviconsCssLoaded()
+  }, [])
+
   return (
     <PageTransition>
       <section className="relative overflow-x-hidden overflow-y-visible">
-        <GradientBlobs variant="soft" />
+        <GradientBlobs variant="soft" density={coarseEffects ? 'light' : 'normal'} />
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Technical Skills"
@@ -54,7 +75,10 @@ export function SkillsPage() {
           />
 
           <div className="mt-14">
-            <SkillConstellation groups={resume.skills} />
+            {/* Orbit + hover labels: popup anchor is measured in SkillConstellation (SMIL + layout). */}
+            <Suspense fallback={<ConstellationFallback />}>
+              <SkillConstellation groups={resume.skills} />
+            </Suspense>
           </div>
         </div>
       </section>

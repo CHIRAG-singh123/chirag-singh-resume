@@ -203,4 +203,100 @@ button.back-to-top-button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .skill-hub-gradient-anim,
+  .skill-hub-ring-pulse {
+    animation: none !important;
+  }
+
+  .skill-hub-ring-pulse {
+    opacity: 0.34;
+  }
+}
+
+/* Orbit ring spin uses SVG SMIL <animateTransform> (see SkillConstellation) — reliable pivot at hub. */
+
+@keyframes skill-hub-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.skill-hub-gradient-anim {
+  background-size: 200% 200%;
+  animation: skill-hub-gradient-shift 8s ease infinite;
+}
+
+.skill-const-pause .skill-hub-gradient-anim {
+  animation-play-state: paused;
+}
+
+.skill-orbit-coarse .skill-hub-gradient-anim {
+  animation: none;
+  background-position: 0% 50%;
+}
+
+@keyframes skill-hub-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.14;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+.skill-hub-ring-pulse {
+  animation: skill-hub-ring-pulse 3.2s ease-in-out infinite;
+}
+
+.skill-const-pause .skill-hub-ring-pulse {
+  animation-play-state: paused;
+}
+
+.skill-orbit-coarse .skill-hub-ring-pulse {
+  animation: none !important;
+  opacity: 0.34;
+}
+
+.orbit-node-scale {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.15s ease;
+  transform: scale(1);
+}
+
+.orbit-node-scale.is-active {
+  transform: scale(1.08);
+}
+
+/* Orbit devicons — lighter than full .skill-ion-lift (fewer stacked filters) */
+.dark .skill-ion-orbit {
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 2px rgba(186, 230, 253, 0.35));
+}
+
+.light .skill-ion-orbit {
+  -webkit-text-stroke: 0.45px rgba(0, 0, 0, 0.14);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+}
+
+.light .skill-ion-orbit.devicon-angular-plain.colored {
+  color: #dd0031 !important;
+}
+
+.skill-orbit-coarse svg.skill-orbit-glow {
+  filter: drop-shadow(0 0 2px rgba(186, 230, 253, 0.35)) !important;
+}
+
+.light .skill-orbit-coarse svg.skill-orbit-glow {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12)) !important;
 }

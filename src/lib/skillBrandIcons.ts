@@ -3,6 +3,9 @@
  * CSS + icon font from `devicon` npm package (`devicon-plain` + `colored` modifier).
  *
  * Unmapped labels return null; UI components use fallbacks (dots / category icons).
+ *
+ * Orbit tooltips and marks use the same strings as resume skill items; changing a label
+ * here or in resume data should stay consistent with `SkillConstellation` node ids.
  */
 
 export type SkillIconGlyph =
