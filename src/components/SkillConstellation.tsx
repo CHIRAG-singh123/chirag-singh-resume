@@ -9,33 +9,19 @@ import {
 } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { Boxes, Code2, Cpu, Wrench } from 'lucide-react'
-import {
-  createElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentType,
-  type SVGProps,
-} from 'react'
-import type { SkillGroup } from '../lib/resume/types'
-import { usePerfProfile } from '../lib/usePerfProfile'
-import { getOrbitDeviconFontScale } from '../lib/orbitIconScale'
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { SkillIconGlyph } from '../lib/skillBrandIcons'
+import { getOrbitSkillIconScale } from '../lib/orbitIconScale'
 import { getSkillIcon } from '../lib/skillBrandIcons'
-import { ComputerVisionEyeGlyph } from './ComputerVisionEyeGlyph'
-import { DeepLearningBrainGlyph } from './DeepLearningBrainGlyph'
-import { GanNeuralGlyph } from './GanNeuralGlyph'
-import { ImageIoGlyph } from './ImageIoGlyph'
-import { TqdmGlyph } from './TqdmGlyph'
-import { TypingText } from './TypingText'
+import type { SkillGroup } from '../lib/resume/types'
 import { durations, easings } from '../motion'
-
-type IconType = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>
+import { SkillIcon } from './SkillIcon'
+import { TypingText } from './TypingText'
 
 interface SkillConstellationProps {
-  /** Resume skill groups — one node per item; hub count = total items (e.g. 27). */
+  /** Resume skill groups - one node per item; hub count = total items (e.g. 27). */
   groups: SkillGroup[]
+  coarseEffects?: boolean
 }
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
@@ -53,9 +39,8 @@ const RING_RADII = [126, 188, 242, 286]
 const ROTATION_DURATIONS = [80, 100, 130, 160]
 const POPUP_DISMISS_MS = 2200
 const SIZE_MORE = 1.4
-const NODE_DISC_R = Math.round(15 * 1.45 * SIZE_MORE)
 const NODE_HIT_R = Math.round(18 * 1.45 * SIZE_MORE)
-const ORBIT_DEVICON_PX = Math.round(15 * 1.45 * SIZE_MORE)
+const NODE_ICON_BASE_PX = Math.round(15 * 1.45 * SIZE_MORE)
 
 const SKILL_CENTER_LABELS = ['SKILLS']
 
@@ -63,98 +48,127 @@ function polar(cx: number, cy: number, r: number, angleRad: number) {
   return [cx + r * Math.cos(angleRad), cy + r * Math.sin(angleRad)] as const
 }
 
-interface NodeDatum {
+interface RingNodeDatum {
+  fallbackIcon: LucideIcon
+  groupLabel: string
+  icon: SkillIconGlyph | null
+  iconScale: number
   id: string
   label: string
-  ring: number
-  angle: number
-  groupLabel: string
-  Icon: IconType
+  x: number
+  y: number
+}
+
+interface RingDatum {
+  clockwise: boolean
+  durationSeconds: number
+  nodes: RingNodeDatum[]
+  radius: number
+  ringIndex: number
 }
 
 interface PopupState {
-  node: NodeDatum
+  node: RingNodeDatum
 }
 
-export function SkillConstellation({ groups }: SkillConstellationProps) {
-  const reduceMotion = useReducedMotion()
-  const { coarseEffects } = usePerfProfile()
-
+export function SkillConstellation({
+  groups,
+  coarseEffects = false,
+}: SkillConstellationProps) {
+  const reduceMotion = useReducedMotion() ?? false
   const rootRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
-  const inView = useInView(rootRef, { amount: 0.1 })
-  /** Hit circles keyed by `NodeDatum.id` — popup position follows real layout (SMIL + transforms). */
-  const anchorCircleRefs = useRef(new Map<string, SVGCircleElement>())
-
-  const countMv = useMotionValue(0)
-  const [hubCount, setHubCount] = useState(0)
-  useMotionValueEvent(countMv, 'change', (v) => {
-    setHubCount(Math.round(v))
-  })
-
-  /** Positioned shell for the label — `left`/`top` set imperatively so Framer never overrides `transform`. */
   const popupAnchorRef = useRef<HTMLDivElement>(null)
+  const anchorCircleRefs = useRef(new Map<string, SVGCircleElement>())
+  const dismissTimerRef = useRef<number | null>(null)
+  const popupNodeRef = useRef<RingNodeDatum | null>(null)
+  const rafPopupRef = useRef<number>(0)
+  const inView = useInView(rootRef, { amount: 0.1 })
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [popup, setPopup] = useState<PopupState | null>(null)
-  const dismissTimerRef = useRef<number | null>(null)
-  const popupNodeRef = useRef<NodeDatum | null>(null)
-  const rafPopupRef = useRef<number>(0)
 
-  const nodes = useMemo<NodeDatum[]>(() => {
-    const list: NodeDatum[] = []
-    groups.forEach((group, ringIdx) => {
-      const Icon = GROUP_ICONS[group.label] ?? Cpu
-      const count = group.items.length
-      group.items.forEach((item, i) => {
-        const angle = (i / count) * Math.PI * 2 - Math.PI / 2
-        list.push({
-          id: `${group.label}-${item}`,
-          label: item,
-          ring: ringIdx,
-          angle,
-          groupLabel: group.label,
-          Icon,
-        })
-      })
-    })
-    return list
-  }, [groups])
+  const countMv = useMotionValue(0)
+  const [hubCount, setHubCount] = useState(0)
+  useMotionValueEvent(countMv, 'change', (value) => {
+    setHubCount(Math.round(value))
+  })
+
+  const ringData = useMemo<RingDatum[]>(
+    () =>
+      groups.map((group, ringIndex) => {
+        const fallbackIcon = GROUP_ICONS[group.label] ?? Cpu
+        const radius = RING_RADII[ringIndex] ?? RING_RADII[RING_RADII.length - 1]
+        const nodeCount = group.items.length
+
+        return {
+          clockwise: ringIndex % 2 === 0,
+          durationSeconds: ROTATION_DURATIONS[ringIndex] ?? 100,
+          radius,
+          ringIndex,
+          nodes: group.items.map((item, itemIndex) => {
+            const angle = (itemIndex / nodeCount) * Math.PI * 2 - Math.PI / 2
+            const [x, y] = polar(0, 0, radius, angle)
+
+            return {
+              fallbackIcon,
+              groupLabel: group.label,
+              icon: getSkillIcon(item),
+              iconScale: getOrbitSkillIconScale(item),
+              id: `${group.label}-${item}`,
+              label: item,
+              x,
+              y,
+            }
+          }),
+        }
+      }),
+    [groups],
+  )
+
+  const totalNodes = useMemo(
+    () => ringData.reduce((count, ring) => count + ring.nodes.length, 0),
+    [ringData],
+  )
+
+  const staticVisuals = reduceMotion || coarseEffects
+  const orbitSpinEnabled = !staticVisuals
+  const hubGradientClass = staticVisuals ? '' : 'skill-hub-gradient-anim'
+  const hubLabelAnimated = !staticVisuals
 
   useEffect(() => {
-    const n = nodes.length
-    if (reduceMotion) {
-      countMv.set(n)
-      setHubCount(n)
+    if (staticVisuals) {
+      countMv.set(totalNodes)
       return
     }
+
     countMv.set(0)
-    setHubCount(0)
-    const c = animate(countMv, n, { duration: 1.28, ease: [0.22, 1, 0.36, 1] })
-    return () => c.stop()
-  }, [nodes.length, reduceMotion, countMv])
+    const controls = animate(countMv, totalNodes, {
+      duration: 1.28,
+      ease: [0.22, 1, 0.36, 1],
+    })
+    return () => controls.stop()
+  }, [countMv, staticVisuals, totalNodes])
 
-  const reduceMotionPreferred = reduceMotion ?? false
-  const orbitSpinEnabled = !reduceMotionPreferred && !coarseEffects
-
-  const syncPopupAnchor = useCallback((node: NodeDatum) => {
+  const syncPopupAnchor = useCallback((node: RingNodeDatum) => {
     const stage = stageRef.current
     const circle = anchorCircleRefs.current.get(node.id)
     const wrap = popupAnchorRef.current
     if (!stage || !circle || !wrap) return
-    const sr = stage.getBoundingClientRect()
-    const cr = circle.getBoundingClientRect()
-    const cx = cr.left + cr.width / 2 - sr.left
-    const cy = cr.top + cr.height / 2 - sr.top
-    wrap.style.left = `${cx}px`
-    wrap.style.top = `${cy}px`
+
+    const stageRect = stage.getBoundingClientRect()
+    const circleRect = circle.getBoundingClientRect()
+    const centerX = circleRect.left + circleRect.width / 2 - stageRect.left
+    const centerY = circleRect.top + circleRect.height / 2 - stageRect.top
+
+    wrap.style.left = `${centerX}px`
+    wrap.style.top = `${centerY}px`
   }, [])
 
   useEffect(() => {
     const svg = svgRef.current
-    if (!svg) return
-    if (!orbitSpinEnabled) return
+    if (!svg || !orbitSpinEnabled) return
     if (inView) svg.unpauseAnimations()
     else svg.pauseAnimations()
   }, [inView, orbitSpinEnabled])
@@ -162,19 +176,32 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
   useEffect(() => {
     if (!popup) return
 
-    const tick = () => {
-      const open = popupNodeRef.current
-      if (open) {
-        syncPopupAnchor(open)
-        rafPopupRef.current = requestAnimationFrame(tick)
-      }
+    const handleResize = () => {
+      const openNode = popupNodeRef.current
+      if (openNode) syncPopupAnchor(openNode)
     }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    if (!orbitSpinEnabled) {
+      return () => window.removeEventListener('resize', handleResize)
+    }
+
+    const tick = () => {
+      const openNode = popupNodeRef.current
+      if (!openNode) return
+      syncPopupAnchor(openNode)
+      rafPopupRef.current = requestAnimationFrame(tick)
+    }
+
     rafPopupRef.current = requestAnimationFrame(tick)
     return () => {
+      window.removeEventListener('resize', handleResize)
       if (rafPopupRef.current) cancelAnimationFrame(rafPopupRef.current)
       rafPopupRef.current = 0
     }
-  }, [popup, syncPopupAnchor])
+  }, [orbitSpinEnabled, popup, syncPopupAnchor])
 
   useEffect(
     () => () => {
@@ -186,7 +213,7 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
     [],
   )
 
-  function showPopup(node: NodeDatum) {
+  function showPopup(node: RingNodeDatum) {
     setHoveredId(node.id)
     popupNodeRef.current = node
     syncPopupAnchor(node)
@@ -195,15 +222,14 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
     if (dismissTimerRef.current !== null) {
       window.clearTimeout(dismissTimerRef.current)
     }
+
     dismissTimerRef.current = window.setTimeout(() => {
       popupNodeRef.current = null
       setPopup(null)
       dismissTimerRef.current = null
     }, POPUP_DISMISS_MS)
-    requestAnimationFrame(() => {
-      syncPopupAnchor(node)
-      requestAnimationFrame(() => syncPopupAnchor(node))
-    })
+
+    requestAnimationFrame(() => syncPopupAnchor(node))
   }
 
   function clearHover(nodeId: string) {
@@ -213,14 +239,12 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
       popupNodeRef.current = null
       return null
     })
+
     if (dismissTimerRef.current !== null) {
       window.clearTimeout(dismissTimerRef.current)
       dismissTimerRef.current = null
     }
   }
-
-  const hubStatic = reduceMotionPreferred || coarseEffects
-  const hubGradientClass = hubStatic ? '' : 'skill-hub-gradient-anim'
 
   const shellClass = [
     'relative mx-auto w-full max-w-[640px]',
@@ -232,13 +256,17 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
 
   return (
     <div ref={rootRef} className={shellClass}>
-      <div ref={stageRef} className="relative aspect-square w-full">
+      <div
+        ref={stageRef}
+        className="relative aspect-square w-full"
+        style={{ contain: 'layout paint' }}
+      >
         <svg
           ref={svgRef}
           overflow="visible"
           viewBox={`0 0 ${VIEW} ${VIEW}`}
           role="img"
-          aria-label={`Skills orbit: ${nodes.length} items in ${groups.length} groups. Select a node on a ring for its name.`}
+          aria-label={`Skills orbit: ${totalNodes} items in ${groups.length} groups. Select a node on a ring for its name.`}
           className="absolute inset-0 block h-full w-full"
         >
           <defs>
@@ -255,193 +283,131 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
 
           <circle cx={CENTER} cy={CENTER} r={70} fill="url(#skill-core)" />
 
-          {RING_RADII.map((r, i) => (
+          {ringData.map((ring, ringIndex) => (
             <motion.circle
-              key={`ring-${i}`}
+              key={`ring-${ring.ringIndex}`}
               cx={CENTER}
               cy={CENTER}
-              r={r}
+              r={ring.radius}
               fill="none"
               stroke="url(#skill-ring)"
               strokeOpacity="0.3"
               strokeDasharray="3 6"
               strokeWidth={1}
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
+              initial={staticVisuals ? undefined : { pathLength: 0, opacity: 0 }}
+              animate={staticVisuals ? undefined : { pathLength: 1, opacity: 1 }}
               transition={{
-                pathLength: { duration: 1.1, ease: easings.cinematic, delay: i * 0.08 },
-                opacity: { duration: 0.5, delay: i * 0.08 },
+                pathLength: {
+                  duration: 1.1,
+                  ease: easings.cinematic,
+                  delay: staticVisuals ? 0 : ringIndex * 0.08,
+                },
+                opacity: { duration: 0.5, delay: staticVisuals ? 0 : ringIndex * 0.08 },
               }}
             />
           ))}
 
-          {RING_RADII.map((r, i) => {
-            const ringNodes = nodes.filter((n) => n.ring === i)
-            if (ringNodes.length === 0) return null
-            const durS = ROTATION_DURATIONS[i] ?? 100
-            const outerCw = i % 2 === 0
-            return (
-              <g key={`ring-nodes-${i}`} transform={`translate(${CENTER} ${CENTER})`}>
-                <g>
-                  {orbitSpinEnabled ? (
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 0 0"
-                      to={outerCw ? '360 0 0' : '-360 0 0'}
-                      dur={`${durS}s`}
-                      repeatCount="indefinite"
-                    />
-                  ) : null}
-                  {ringNodes.map((node, idx) => {
-                    const [x, y] = polar(0, 0, r, node.angle)
-                    const active = hoveredId === node.id
-                    const skillIcon = getSkillIcon(node.label)
-                    const foSize = NODE_DISC_R * 2
-                    return (
-                      <motion.g
-                        key={node.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{
-                          duration: durations.base,
-                          ease: easings.entrance,
-                          delay: 0.4 + idx * 0.04 + i * 0.05,
+          {ringData.map((ring) => (
+            <g key={`ring-nodes-${ring.ringIndex}`} transform={`translate(${CENTER} ${CENTER})`}>
+              <g>
+                {orbitSpinEnabled ? (
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    from="0 0 0"
+                    to={ring.clockwise ? '360 0 0' : '-360 0 0'}
+                    dur={`${ring.durationSeconds}s`}
+                    repeatCount="indefinite"
+                  />
+                ) : null}
+
+                {ring.nodes.map((node, nodeIndex) => {
+                  const active = hoveredId === node.id
+                  const iconSize = Math.round(NODE_ICON_BASE_PX * node.iconScale)
+                  const iconOffset = iconSize / 2
+
+                  return (
+                    <motion.g
+                      key={node.id}
+                      initial={staticVisuals ? undefined : { opacity: 0, scale: 0.92 }}
+                      animate={staticVisuals ? undefined : { opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: staticVisuals ? 0 : durations.base,
+                        ease: easings.entrance,
+                        delay: staticVisuals
+                          ? 0
+                          : 0.24 + nodeIndex * 0.025 + ring.ringIndex * 0.05,
+                      }}
+                      onMouseEnter={() => showPopup(node)}
+                      onMouseLeave={() => clearHover(node.id)}
+                      onFocus={() => showPopup(node)}
+                      onBlur={() => clearHover(node.id)}
+                      style={{ cursor: 'pointer' }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`${node.label} — ${node.groupLabel}`}
+                    >
+                      <title>
+                        {node.label} — {node.groupLabel}
+                      </title>
+                      <circle
+                        ref={(element) => {
+                          if (element) anchorCircleRefs.current.set(node.id, element)
+                          else anchorCircleRefs.current.delete(node.id)
                         }}
-                        onMouseEnter={() => showPopup(node)}
-                        onMouseLeave={() => clearHover(node.id)}
-                        onFocus={() => showPopup(node)}
-                        onBlur={() => clearHover(node.id)}
-                        style={{ cursor: 'pointer' }}
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`${node.label} — ${node.groupLabel}`}
-                      >
-                        <title>
-                          {node.label} — {node.groupLabel}
-                        </title>
-                        <circle
-                          ref={(el) => {
-                            if (el) anchorCircleRefs.current.set(node.id, el)
-                            else anchorCircleRefs.current.delete(node.id)
-                          }}
-                          cx={x}
-                          cy={y}
-                          r={NODE_HIT_R}
-                          fill="transparent"
-                          pointerEvents="all"
-                        />
-                        <g transform={`translate(${x} ${y})`} pointerEvents="none">
-                          <g>
-                            {orbitSpinEnabled ? (
-                              <animateTransform
-                                attributeName="transform"
-                                type="rotate"
-                                from="0 0 0"
-                                to={outerCw ? '-360 0 0' : '360 0 0'}
-                                dur={`${durS}s`}
-                                repeatCount="indefinite"
+                        cx={node.x}
+                        cy={node.y}
+                        r={NODE_HIT_R}
+                        fill="transparent"
+                        pointerEvents="all"
+                      />
+                      <g transform={`translate(${node.x} ${node.y})`} pointerEvents="none">
+                        <g>
+                          {orbitSpinEnabled ? (
+                            <animateTransform
+                              attributeName="transform"
+                              type="rotate"
+                              from="0 0 0"
+                              to={ring.clockwise ? '-360 0 0' : '360 0 0'}
+                              dur={`${ring.durationSeconds}s`}
+                              repeatCount="indefinite"
+                            />
+                          ) : null}
+                          <g className={`orbit-node-scale ${active ? 'is-active' : ''}`}>
+                            {node.icon ? (
+                              <SkillIcon
+                                glyph={node.icon}
+                                tone="orbit"
+                                x={-iconOffset}
+                                y={-iconOffset}
+                                width={iconSize}
+                                height={iconSize}
+                                aria-hidden
                               />
-                            ) : null}
-                            <g className={`orbit-node-scale ${active ? 'is-active' : ''}`}>
-                              {skillIcon?.kind === 'ganNeural' ? (
-                                <GanNeuralGlyph
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                />
-                              ) : skillIcon?.kind === 'tqdmLogo' ? (
-                                <TqdmGlyph
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                />
-                              ) : skillIcon?.kind === 'deepLearningBrain' ? (
-                                <DeepLearningBrainGlyph
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                />
-                              ) : skillIcon?.kind === 'computerVisionEye' ? (
-                                <ComputerVisionEyeGlyph
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                />
-                              ) : skillIcon?.kind === 'imageIoGlyph' ? (
-                                <ImageIoGlyph
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                />
-                              ) : skillIcon?.kind === 'devicon' ? (
-                                <foreignObject
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                  className="overflow-visible"
-                                  pointerEvents="none"
-                                >
-                                  <div
-                                    className="pointer-events-none flex h-full w-full items-center justify-center bg-transparent"
-                                    // @ts-expect-error — valid on foreignObject HTML wrapper
-                                    xmlns="http://www.w3.org/1999/xhtml"
-                                  >
-                                    <i
-                                      className={`${skillIcon.iconClass} colored skill-ion-orbit`}
-                                      style={{
-                                        fontSize: Math.round(
-                                          ORBIT_DEVICON_PX * getOrbitDeviconFontScale(node.label),
-                                        ),
-                                        lineHeight: 1,
-                                      }}
-                                      aria-hidden
-                                    />
-                                  </div>
-                                </foreignObject>
-                              ) : (
-                                <foreignObject
-                                  x={-NODE_DISC_R}
-                                  y={-NODE_DISC_R}
-                                  width={foSize}
-                                  height={foSize}
-                                  className="overflow-visible"
-                                >
-                                  <div
-                                    className="pointer-events-none flex h-full w-full items-center justify-center bg-transparent text-accent"
-                                    // @ts-expect-error — valid on foreignObject HTML wrapper
-                                    xmlns="http://www.w3.org/1999/xhtml"
-                                  >
-                                    {createElement(node.Icon, {
-                                      width: ORBIT_DEVICON_PX,
-                                      height: ORBIT_DEVICON_PX,
-                                      className: 'max-h-full max-w-full shrink-0',
-                                      'aria-hidden': true,
-                                    })}
-                                  </div>
-                                </foreignObject>
-                              )}
-                            </g>
+                            ) : (
+                              createElement(node.fallbackIcon, {
+                                x: -iconOffset,
+                                y: -iconOffset,
+                                width: iconSize,
+                                height: iconSize,
+                                className: 'skill-icon-orbit max-h-full max-w-full shrink-0',
+                                'aria-hidden': true,
+                              })
+                            )}
                           </g>
                         </g>
-                      </motion.g>
-                    )
-                  })}
-                </g>
+                      </g>
+                    </motion.g>
+                  )
+                })}
               </g>
-            )
-          })}
+            </g>
+          ))}
 
           <motion.g
-            initial={reduceMotion ? undefined : { opacity: 0.88, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.58, ease: easings.cinematic, delay: reduceMotion ? 0 : 0.18 }}
+            initial={staticVisuals ? undefined : { opacity: 0.88, scale: 0.94 }}
+            animate={staticVisuals ? undefined : { opacity: 1, scale: 1 }}
+            transition={{ duration: 0.58, ease: easings.cinematic, delay: staticVisuals ? 0 : 0.18 }}
           >
             <circle
               cx={CENTER}
@@ -450,7 +416,7 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
               fill="none"
               stroke="var(--color-accent)"
               strokeWidth={3.5}
-              className={hubStatic ? 'opacity-[0.34]' : 'skill-hub-ring-pulse'}
+              className={staticVisuals ? 'opacity-[0.34]' : 'skill-hub-ring-pulse'}
             />
             <circle
               cx={CENTER}
@@ -466,9 +432,9 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
         <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center">
           <motion.div
             className="flex max-w-[36%] flex-col items-center justify-center text-center sm:max-w-[32%]"
-            initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.52, delay: reduceMotion ? 0 : 0.2, ease: easings.cinematic }}
+            initial={staticVisuals ? undefined : { opacity: 0, y: 8 }}
+            animate={staticVisuals ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, delay: staticVisuals ? 0 : 0.2, ease: easings.cinematic }}
           >
             <span className="inline-block font-display text-[clamp(1.2rem,5.5vw,1.55rem)] font-bold leading-none tabular-nums tracking-tight">
               <span
@@ -480,13 +446,19 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
             <span
               className={`mt-1.5 inline-block bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent ${hubGradientClass}`}
             >
-              <TypingText
-                phrases={SKILL_CENTER_LABELS}
-                loop={false}
-                typingSpeed={40}
-                startDelayMs={440}
-                className="font-display text-[clamp(0.75rem,3.15vw,1.05rem)] font-bold tracking-wide uppercase"
-              />
+              {hubLabelAnimated ? (
+                <TypingText
+                  phrases={SKILL_CENTER_LABELS}
+                  loop={false}
+                  typingSpeed={40}
+                  startDelayMs={440}
+                  className="font-display text-[clamp(0.75rem,3.15vw,1.05rem)] font-bold uppercase tracking-wide"
+                />
+              ) : (
+                <span className="font-display text-[clamp(0.75rem,3.15vw,1.05rem)] font-bold uppercase tracking-wide">
+                  {SKILL_CENTER_LABELS[0]}
+                </span>
+              )}
             </span>
           </motion.div>
         </div>
@@ -500,14 +472,14 @@ export function SkillConstellation({ groups }: SkillConstellationProps) {
             {popup && (
               <motion.div
                 key={popup.node.id}
-                initial={{ opacity: 0, y: 6, scale: 0.92 }}
+                initial={staticVisuals ? undefined : { opacity: 0, y: 6, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                exit={{ opacity: 0, y: 4, scale: 0.98 }}
                 transition={{ duration: durations.fast, ease: easings.cinematic }}
               >
                 <span
                   className={
-                    coarseEffects
+                    staticVisuals
                       ? 'inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground shadow-md'
                       : 'inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card/95 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground shadow-md backdrop-blur-sm'
                   }

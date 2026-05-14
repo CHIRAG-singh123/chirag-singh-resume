@@ -1,13 +1,42 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import type { ReactNode } from 'react'
-import { pageVariants } from '../motion'
+import { durations, easings, pageVariants } from '../motion'
 
 interface PageTransitionProps {
   children: ReactNode
   className?: string
+  variant?: 'default' | 'transformOnly'
 }
 
-export function PageTransition({ children, className }: PageTransitionProps) {
+const transformOnlyVariants = {
+  hidden: { opacity: 0, y: 18, scale: 0.992 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: durations.medium,
+      ease: easings.cinematic,
+      when: 'beforeChildren',
+      staggerChildren: 0.04,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.995,
+    transition: {
+      duration: durations.fast,
+      ease: easings.smooth,
+    },
+  },
+} as const
+
+export function PageTransition({
+  children,
+  className,
+  variant = 'default',
+}: PageTransitionProps) {
   const shouldReduceMotion = useReducedMotion()
 
   if (shouldReduceMotion) {
@@ -26,7 +55,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
 
   return (
     <motion.div
-      variants={pageVariants}
+      variants={variant === 'transformOnly' ? transformOnlyVariants : pageVariants}
       initial="hidden"
       animate="show"
       exit="exit"

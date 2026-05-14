@@ -1,13 +1,13 @@
 import { normalizeSkillKey } from './skillBrandIcons'
 
-/** Scale custom 24×24 SVG content so it matches typical devicon footprint in the orbit cell. */
-export const ORBIT_CUSTOM_GLYPH_SCALE = 0.862
+/** Scale custom 24x24 SVG content so it matches the rest of the orbit glyphs. */
+export const ORBIT_CUSTOM_GLYPH_SCALE = 1
 
 /**
- * Devicon glyphs vary a lot in perceived size at the same font-size.
- * Orbit-only multipliers tune toward equal visual weight (container is fixed).
+ * Brand glyphs vary in perceived size at the same viewport box.
+ * Orbit-only multipliers tune toward equal visual weight.
  */
-const ORBIT_DEVICON_FONT_SCALE: Record<string, number> = {
+const ORBIT_ICON_SCALE: Record<string, number> = {
   php: 1.14,
   java: 1.12,
   django: 1.12,
@@ -16,8 +16,12 @@ const ORBIT_DEVICON_FONT_SCALE: Record<string, number> = {
   laravel: 1.08,
   flutter: 1.06,
   mongodb: 1.06,
+  'computer vision': 1.12,
+  'deep learning': 1.12,
   mern: 1.06,
   express: 1.05,
+  gans: 1.14,
+  imageio: 1.14,
   nodejs: 1.05,
   react: 0.96,
   nlp: 1.04,
@@ -33,6 +37,7 @@ const ORBIT_DEVICON_FONT_SCALE: Record<string, number> = {
   opencv: 0.96,
   numpy: 0.96,
   cnn: 0.94,
+  tqdm: 1.16,
   typescript: 0.96,
   supabase: 1,
   tkinter: 1.05,
@@ -41,8 +46,11 @@ const ORBIT_DEVICON_FONT_SCALE: Record<string, number> = {
   'production-ready uis': 0.97,
 }
 
-/** Multiplier applied to `fontSize` for this label’s devicon on the orbit only. */
-export function getOrbitDeviconFontScale(label: string): number {
+/** Multiplier applied to the orbit icon box for this label. */
+export function getOrbitSkillIconScale(label: string): number {
   const key = normalizeSkillKey(label)
-  return ORBIT_DEVICON_FONT_SCALE[key] ?? 1
+  return ORBIT_ICON_SCALE[key] ?? 1
 }
+
+/** Backward-compatible alias for older call sites. */
+export const getOrbitDeviconFontScale = getOrbitSkillIconScale

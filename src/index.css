@@ -130,7 +130,7 @@ body {
 }
 
 /* ============================================
-   Skip link (a11y) — visible only when focused
+   Skip link (a11y) - visible only when focused
    ============================================ */
 .skip-link {
   position: fixed;
@@ -155,7 +155,7 @@ body {
 }
 
 /* ============================================
-   BackToTop fix — `position: fixed` must override any inherited rules
+   BackToTop fix - `position: fixed` must override any inherited rules
    ============================================ */
 button.back-to-top-button {
   position: fixed !important;
@@ -164,31 +164,36 @@ button.back-to-top-button {
 }
 
 /* ============================================
-   Skill marks — one shared glow for devicon fonts + custom SVGs (orbit & chips).
-   Avoids per-icon brightness stacks that read as uneven halos in dark mode.
+   Skill marks - one shared glow for inline SVGs + custom glyphs.
    ============================================ */
-.dark .skill-ion-lift,
-.dark svg.skill-orbit-glow {
-  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 0 1.15px rgba(255, 255, 255, 0.55))
-    drop-shadow(0 0 5px rgba(186, 230, 253, 0.34))
-    drop-shadow(0 0 10px rgba(103, 232, 249, 0.18));
+.skill-icon-mark,
+.skill-icon-orbit {
+  overflow: visible;
 }
 
-/* Light mode: devicon “plain” / light fills disappear on pale backgrounds — subtle rim + shadow */
-.light .skill-ion-lift,
+.skill-icon-custom-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(1.06);
+}
+
+.dark .skill-icon-mark,
+.dark svg.skill-orbit-glow {
+  filter: drop-shadow(0 0 1.15px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 5px rgba(186, 230, 253, 0.28))
+    drop-shadow(0 0 10px rgba(103, 232, 249, 0.16));
+}
+
+.light .skill-icon-mark,
 .light svg.skill-orbit-glow {
-  -webkit-text-stroke: 0.45px rgba(0, 0, 0, 0.14);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.22))
-    drop-shadow(0 0 3px rgba(0, 0, 0, 0.12))
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.2))
+    drop-shadow(0 0 3px rgba(0, 0, 0, 0.1))
     drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* Devicon sets Angular “colored” to pure white — invisible on light gray */
-.light .skill-ion-lift.devicon-angular-plain.colored {
-  color: #dd0031 !important;
+.skills-page-lite .skill-icon-mark,
+.skills-page-lite svg.skill-orbit-glow {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.1));
 }
 
 /* ============================================
@@ -214,7 +219,7 @@ button.back-to-top-button {
   }
 }
 
-/* Orbit ring spin uses SVG SMIL <animateTransform> (see SkillConstellation) — reliable pivot at hub. */
+/* Orbit ring spin uses SVG SMIL <animateTransform> (see SkillConstellation) - reliable pivot at hub. */
 
 @keyframes skill-hub-gradient-shift {
   0% {
@@ -276,27 +281,21 @@ button.back-to-top-button {
   transform: scale(1.08);
 }
 
-/* Orbit devicons — lighter than full .skill-ion-lift (fewer stacked filters) */
-.dark .skill-ion-orbit {
-  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
-  paint-order: stroke fill;
+.dark .skill-icon-orbit {
   filter: drop-shadow(0 0 2px rgba(186, 230, 253, 0.35));
 }
 
-.light .skill-ion-orbit {
-  -webkit-text-stroke: 0.45px rgba(0, 0, 0, 0.14);
-  paint-order: stroke fill;
+.light .skill-icon-orbit {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
 }
 
-.light .skill-ion-orbit.devicon-angular-plain.colored {
-  color: #dd0031 !important;
-}
-
+.skill-orbit-coarse .skill-icon-orbit,
 .skill-orbit-coarse svg.skill-orbit-glow {
   filter: drop-shadow(0 0 2px rgba(186, 230, 253, 0.35)) !important;
 }
 
-.light .skill-orbit-coarse svg.skill-orbit-glow {
+.light .skill-orbit-coarse .skill-icon-orbit,
+.light .skill-orbit-coarse svg.skill-orbit-glow,
+.light .skills-page-lite svg.skill-orbit-glow {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12)) !important;
 }

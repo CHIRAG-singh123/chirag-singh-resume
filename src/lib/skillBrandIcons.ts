@@ -1,18 +1,18 @@
+import type { SkillSvgIconName } from './skillSvgIcons'
+
 /**
- * Tech marks via Devicon (MIT) — https://devicon.dev/
- * CSS + icon font from `devicon` npm package (`devicon-plain` + `colored` modifier).
+ * Skill marks resolve to a small inline-SVG subset plus a handful of custom glyphs.
  *
  * Unmapped labels return null; UI components use fallbacks (dots / category icons).
  *
  * Orbit tooltips and marks use the same strings as resume skill items; changing a label
  * here or in resume data should stay consistent with `SkillConstellation` node ids.
  */
-
 export type SkillIconGlyph =
   | {
-      kind: 'devicon'
-      /** Single class e.g. `devicon-python-plain` (do not include `colored`). */
-      iconClass: string
+      kind: 'svg'
+      color?: string
+      name: SkillSvgIconName
     }
   | { kind: 'ganNeural' }
   | { kind: 'tqdmLogo' }
@@ -20,60 +20,64 @@ export type SkillIconGlyph =
   | { kind: 'computerVisionEye' }
   | { kind: 'imageIoGlyph' }
 
-/** Compound labels that use a non-devicon or custom mark. */
+function svg(name: SkillSvgIconName, color?: string): SkillIconGlyph {
+  return { kind: 'svg', name, color }
+}
+
+/** Compound labels that use a non-SVG-mapped custom mark. */
 const COMPOUND_CUSTOM: Record<string, SkillIconGlyph> = {
   'generative ai & gans': { kind: 'ganNeural' },
   'computer vision': { kind: 'computerVisionEye' },
 }
 
-/** Specialty tiles + matching orbit labels — full-string lowercase match on label. */
-const COMPOUND_LABELS: Record<string, string> = {
-  'mern & django apps': 'devicon-react-original',
-  'nlp & chatbots': 'devicon-anaconda-plain',
-  'ml pipelines': 'devicon-jupyter-plain',
+/** Specialty tiles + matching orbit labels - full-string lowercase match on label. */
+const COMPOUND_LABELS: Record<string, SkillIconGlyph> = {
+  'mern & django apps': svg('react'),
+  'nlp & chatbots': svg('anaconda'),
+  'ml pipelines': svg('jupyter'),
   /** Same string as resume item `Production-ready UIs` (Tailwind). */
-  'production-ready uis': 'devicon-tailwindcss-plain',
+  'production-ready uis': svg('tailwind'),
 }
 
-/** Normalized key → devicon-* class (without `colored`). */
-const DEVICON_BY_KEY: Record<string, string> = {
-  python: 'devicon-python-plain',
-  java: 'devicon-java-plain',
-  javascript: 'devicon-javascript-plain',
-  php: 'devicon-php-plain',
+/** Normalized key -> inline SVG metadata. */
+const DEVICON_BY_KEY: Record<string, SkillIconGlyph> = {
+  python: svg('python'),
+  java: svg('java'),
+  javascript: svg('javascript'),
+  php: svg('php'),
 
-  django: 'devicon-django-plain',
-  mern: 'devicon-mongodb-plain',
-  angular: 'devicon-angular-plain',
-  laravel: 'devicon-laravel-plain',
-  tensorflow: 'devicon-tensorflow-original',
-  keras: 'devicon-keras-plain',
-  'scikit-learn': 'devicon-scikitlearn-plain',
-  flutter: 'devicon-flutter-plain',
+  django: svg('django'),
+  mern: svg('mongodb'),
+  angular: svg('angular', '#dd0031'),
+  laravel: svg('laravel'),
+  tensorflow: svg('tensorflow'),
+  keras: svg('keras'),
+  'scikit-learn': svg('scikitlearn'),
+  flutter: svg('flutter'),
 
-  nlp: 'devicon-anaconda-plain',
-  'machine learning': 'devicon-jupyter-plain',
-  'api integration': 'devicon-fastapi-plain',
-  'responsive web design': 'devicon-css3-plain',
-  git: 'devicon-git-plain',
+  nlp: svg('anaconda'),
+  'machine learning': svg('jupyter'),
+  'api integration': svg('fastapi'),
+  'responsive web design': svg('css3'),
+  git: svg('git'),
 
-  /** Library chip — distinct from the “Computer Vision” concept (matlab). */
-  opencv: 'devicon-opencv-plain',
-  matplotlib: 'devicon-matplotlib-plain',
-  numpy: 'devicon-numpy-plain',
+  /** Library chip - distinct from the "Computer Vision" concept. */
+  opencv: svg('opencv'),
+  matplotlib: svg('matplotlib'),
+  numpy: svg('numpy'),
 
-  mongodb: 'devicon-mongodb-plain',
-  express: 'devicon-express-original',
-  react: 'devicon-react-original',
-  nodejs: 'devicon-nodejs-plain',
+  mongodb: svg('mongodb'),
+  express: svg('express'),
+  react: svg('react'),
+  nodejs: svg('nodejs'),
 
-  cnn: 'devicon-pytorch-plain',
-  tkinter: 'devicon-vscode-plain',
-  'google oauth': 'devicon-google-original',
-  'google translate': 'devicon-googlecloud-plain',
+  cnn: svg('pytorch'),
+  tkinter: svg('vscode', '#2f80ed'),
+  'google oauth': svg('google'),
+  'google translate': svg('googleCloud'),
 
-  typescript: 'devicon-typescript-plain',
-  supabase: 'devicon-supabase-plain',
+  typescript: svg('typescript'),
+  supabase: svg('supabase', '#3ecf8e'),
 }
 
 export function normalizeSkillKey(raw: string): string {
@@ -92,8 +96,8 @@ export function getSkillIcon(label: string): SkillIconGlyph | null {
   const customCompound = COMPOUND_CUSTOM[compound]
   if (customCompound) return customCompound
 
-  const compoundClass = COMPOUND_LABELS[compound]
-  if (compoundClass) return { kind: 'devicon', iconClass: compoundClass }
+  const compoundIcon = COMPOUND_LABELS[compound]
+  if (compoundIcon) return compoundIcon
 
   const key = normalizeSkillKey(label)
   if (key === 'gans') return { kind: 'ganNeural' }
@@ -101,7 +105,5 @@ export function getSkillIcon(label: string): SkillIconGlyph | null {
   if (key === 'deep learning') return { kind: 'deepLearningBrain' }
   if (key === 'imageio') return { kind: 'imageIoGlyph' }
 
-  const iconClass = DEVICON_BY_KEY[key]
-  if (!iconClass) return null
-  return { kind: 'devicon', iconClass }
+  return DEVICON_BY_KEY[key] ?? null
 }

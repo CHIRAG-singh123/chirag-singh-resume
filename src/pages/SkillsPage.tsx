@@ -1,29 +1,24 @@
 import { motion } from 'framer-motion'
 import { Boxes, Code2, Cpu, Wrench } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { lazy, Suspense, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { AnimatedSection } from '../components/AnimatedSection'
 import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
 import { SectionHeading } from '../components/SectionHeading'
 import { SkillBadge } from '../components/SkillBadge'
 import { SkillBrandMark } from '../components/SkillBrandMark'
+import { SkillConstellation } from '../components/SkillConstellation'
 import { resume } from '../data/resume'
-import { ensureDeviconsCssLoaded } from '../lib/loadDeviconCss'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import { usePerfProfile } from '../lib/usePerfProfile'
 import {
   cinematicTransition,
   durations,
   itemVariantsScale,
-  sectionVariants,
   springs,
   viewport,
 } from '../motion'
-
-const SkillConstellation = lazy(() =>
-  import('../components/SkillConstellation').then((m) => ({ default: m.SkillConstellation })),
-)
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
   Languages: Code2,
@@ -32,13 +27,14 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Tools: Wrench,
 }
 
-function ConstellationFallback() {
-  return (
-    <div
-      className="mx-auto aspect-square w-full max-w-[640px] rounded-2xl bg-muted/30"
-      aria-hidden
-    />
-  )
+const SKILL_GROUP_SECTION_STYLE: CSSProperties = {
+  containIntrinsicSize: '960px',
+  contentVisibility: 'auto',
+}
+
+const SPECIALTIES_SECTION_STYLE: CSSProperties = {
+  containIntrinsicSize: '720px',
+  contentVisibility: 'auto',
 }
 
 export function SkillsPage() {
@@ -51,14 +47,29 @@ export function SkillsPage() {
     canonical: '/skills',
   })
 
-  useEffect(() => {
-    void ensureDeviconsCssLoaded()
-  }, [])
+  const animatedGradientClass = coarseEffects
+    ? 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent'
+    : 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift'
+
+  const groupHaloClass = coarseEffects
+    ? 'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/8 opacity-70'
+    : 'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl transition-all duration-500 group-hover:bg-accent/25'
+
+  const specialtySurfaceClass = coarseEffects
+    ? 'rounded-2xl border border-border bg-background/85 p-5 transition-[border-color,box-shadow] duration-300 hover:border-accent/50'
+    : 'rounded-2xl border border-border bg-background/80 p-5 backdrop-blur transition-[border-color,box-shadow] duration-300 hover:border-accent/50'
 
   return (
-    <PageTransition>
+    <PageTransition
+      variant="transformOnly"
+      className={coarseEffects ? 'skills-page-lite' : undefined}
+    >
       <section className="relative overflow-x-hidden overflow-y-visible">
-        <GradientBlobs variant="soft" density={coarseEffects ? 'light' : 'normal'} />
+        <GradientBlobs
+          variant="soft"
+          density={coarseEffects ? 'light' : 'normal'}
+          animated={!coarseEffects}
+        />
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Technical Skills"
@@ -66,7 +77,7 @@ export function SkillsPage() {
               <>
                 A versatile stack for
                 <br />
-                <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text font-bold tracking-tight text-transparent animate-gradient-shift">
+                <span className={`font-bold tracking-tight ${animatedGradientClass}`}>
                   AI + full-stack builds
                 </span>
               </>
@@ -75,101 +86,136 @@ export function SkillsPage() {
           />
 
           <div className="mt-14">
-            {/* Orbit + hover labels: popup anchor is measured in SkillConstellation (SMIL + layout). */}
-            <Suspense fallback={<ConstellationFallback />}>
-              <SkillConstellation groups={resume.skills} />
-            </Suspense>
+            <SkillConstellation groups={resume.skills} coarseEffects={coarseEffects} />
           </div>
         </div>
       </section>
 
-      <AnimatedSection className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="grid gap-6 md:grid-cols-2">
-          {resume.skills.map((group, idx) => {
-            const Icon = GROUP_ICONS[group.label] ?? Cpu
-            return (
-              <motion.div
-                key={group.label}
-                variants={sectionVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: viewport.once, amount: 0.2 }}
-                transition={cinematicTransition(durations.medium, idx * 0.08)}
-                whileHover={{ y: -6, transition: springs.hover }}
-                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
-              >
-                <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl transition-all duration-500 group-hover:bg-accent/25" />
+      <div style={SKILL_GROUP_SECTION_STYLE}>
+        <AnimatedSection
+          className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8"
+          variant="soft"
+        >
+          <div className="grid gap-6 md:grid-cols-2">
+            {resume.skills.map((group, idx) => {
+              const Icon = GROUP_ICONS[group.label] ?? Cpu
+              return (
+                <motion.div
+                  key={group.label}
+                  variants={itemVariantsScale}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: viewport.once, amount: 0.2 }}
+                  transition={
+                    coarseEffects
+                      ? { duration: durations.fast }
+                      : cinematicTransition(durations.medium, idx * 0.08)
+                  }
+                  whileHover={{
+                    y: coarseEffects ? -3 : -6,
+                    transition: springs.hover,
+                  }}
+                  className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
+                >
+                  <div className={groupHaloClass} />
 
-                <div className="relative flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-hero-gradient bg-[length:200%_200%] text-white shadow-glow animate-gradient-shift">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <h3 className="font-display text-xl font-bold text-foreground sm:text-2xl">
-                      {group.label}
-                    </h3>
-                    <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                      {group.items.length} tools in rotation
-                    </p>
+                  <div className="relative flex items-center gap-4">
+                    <span
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-hero-gradient bg-[length:200%_200%] text-white ${
+                        coarseEffects ? 'shadow-md' : 'shadow-glow animate-gradient-shift'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h3 className="font-display text-xl font-bold text-foreground sm:text-2xl">
+                        {group.label}
+                      </h3>
+                      <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                        {group.items.length} tools in rotation
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="relative mt-6 flex flex-wrap gap-2">
-                  {group.items.map((item, i) => (
-                    <SkillBadge key={item} label={item} delay={i * 0.03} />
-                  ))}
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-10 shadow-xl">
-          <div className="absolute inset-0 -z-10 bg-hero-gradient bg-[length:200%_200%] opacity-10 animate-gradient-shift" />
-          <SectionHeading
-            eyebrow="Signature strengths"
-            title={
-              <>
-                Specialties I{' '}
-                <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text font-bold tracking-tight text-transparent animate-gradient-shift">
-                  lean into
-                </span>
-              </>
-            }
-            description="Themes that show up repeatedly across my projects."
-          />
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              'Generative AI & GANs',
-              'MERN & Django apps',
-              'Computer Vision',
-              'NLP & Chatbots',
-              'ML Pipelines',
-              'Production-ready UIs',
-            ].map((item, idx) => (
-              <motion.div
-                key={item}
-                variants={itemVariantsScale}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: viewport.once, amount: 0.4 }}
-                transition={cinematicTransition(durations.base, idx * 0.06)}
-                whileHover={{ y: -4, transition: springs.hover }}
-                className="rounded-2xl border border-border bg-background/80 p-5 backdrop-blur transition-[border-color,box-shadow] duration-300 hover:border-accent/50"
-              >
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
-                  <SkillBrandMark label={item} className="h-9 w-9" fallback={<Cpu className="h-7 w-7" />} />
-                </span>
-                <p className="mt-3 font-display text-base font-bold tracking-tight text-foreground">
-                  {item}
-                </p>
-              </motion.div>
-            ))}
+                  <div className="relative mt-6 flex flex-wrap gap-2">
+                    {group.items.map((item, itemIdx) => (
+                      <SkillBadge
+                        key={item}
+                        label={item}
+                        coarseEffects={coarseEffects}
+                        delay={coarseEffects ? 0 : itemIdx * 0.03}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
-        </div>
-      </AnimatedSection>
+        </AnimatedSection>
+      </div>
+
+      <div style={SPECIALTIES_SECTION_STYLE}>
+        <AnimatedSection
+          className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8"
+          variant="soft"
+        >
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-10 shadow-xl">
+            <div
+              className={`absolute inset-0 -z-10 bg-hero-gradient bg-[length:200%_200%] opacity-10 ${
+                coarseEffects ? '' : 'animate-gradient-shift'
+              }`}
+            />
+            <SectionHeading
+              eyebrow="Signature strengths"
+              title={
+                <>
+                  Specialties I <span className={`font-bold tracking-tight ${animatedGradientClass}`}>lean into</span>
+                </>
+              }
+              description="Themes that show up repeatedly across my projects."
+            />
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                'Generative AI & GANs',
+                'MERN & Django apps',
+                'Computer Vision',
+                'NLP & Chatbots',
+                'ML Pipelines',
+                'Production-ready UIs',
+              ].map((item, idx) => (
+                <motion.div
+                  key={item}
+                  variants={itemVariantsScale}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: viewport.once, amount: 0.4 }}
+                  transition={
+                    coarseEffects
+                      ? { duration: durations.fast }
+                      : cinematicTransition(durations.base, idx * 0.06)
+                  }
+                  whileHover={{
+                    y: coarseEffects ? -2 : -4,
+                    transition: springs.hover,
+                  }}
+                  className={specialtySurfaceClass}
+                >
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                    <SkillBrandMark
+                      label={item}
+                      className="h-9 w-9"
+                      fallback={<Cpu className="h-7 w-7" />}
+                    />
+                  </span>
+                  <p className="mt-3 font-display text-base font-bold tracking-tight text-foreground">
+                    {item}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </AnimatedSection>
+      </div>
     </PageTransition>
   )
 }
