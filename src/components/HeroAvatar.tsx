@@ -228,7 +228,7 @@ export function HeroAvatar() {
       />
 
       <div
-        className="absolute inset-0 will-change-transform motion-reduce:animate-none animate-[spin_28s_linear_infinite]"
+        className="pointer-events-none absolute inset-0 will-change-transform motion-reduce:animate-none animate-[spin_28s_linear_infinite]"
       >
         {PRIMARY_ORBIT_LOGOS.map((logo) => (
           <button
@@ -243,7 +243,7 @@ export function HeroAvatar() {
             onFocus={() => showPopup(logo)}
             onBlur={() => clearPopup(logo.label)}
             aria-label={logo.popupLabel}
-            className={`absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
+            className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
           >
             <span className={primaryCounterSpinClass}>
               <SkillIcon
@@ -258,7 +258,7 @@ export function HeroAvatar() {
       </div>
 
       <div
-        className="absolute inset-[-15%] will-change-transform motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]"
+        className="pointer-events-none absolute inset-[-15%] will-change-transform motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]"
       >
         {SECONDARY_ORBIT_LOGOS.map((logo) => (
           <button
@@ -273,7 +273,7 @@ export function HeroAvatar() {
             onFocus={() => showPopup(logo)}
             onBlur={() => clearPopup(logo.label)}
             aria-label={logo.popupLabel}
-            className={`absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
+            className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
           >
             <span className={secondaryCounterSpinClass}>
               <SkillIcon
