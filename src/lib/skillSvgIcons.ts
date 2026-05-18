@@ -95,3 +95,19 @@ export type SkillSvgIconName = keyof typeof SKILL_SVG_ICONS
 export function getSkillSvgIcon(name: SkillSvgIconName): SkillSvgSource {
   return SKILL_SVG_ICONS[name]
 }
+
+const DATA_URI_CACHE = new Map<string, string>()
+
+export function getSkillSvgIconDataUri(name: SkillSvgIconName, color?: string): string {
+  const cacheKey = color ? `${name}:${color}` : name
+  const cached = DATA_URI_CACHE.get(cacheKey)
+  if (cached) return cached
+
+  const source = getSkillSvgIcon(name)
+  const body = color ? source.body.replace(/currentColor/g, color) : source.body
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${source.viewBox}">${body}</svg>`
+  const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`
+
+  DATA_URI_CACHE.set(cacheKey, uri)
+  return uri
+}

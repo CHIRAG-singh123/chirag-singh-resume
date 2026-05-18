@@ -32,7 +32,7 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 }
 
 /** Large enough that outer-ring nodes + hover scale stay inside the viewBox. */
-const VIEW = 720
+const VIEW = 640
 const CENTER = VIEW / 2
 
 const RING_RADII = [126, 188, 242, 286]
@@ -492,7 +492,7 @@ export function SkillConstellation({
         </div>
       </div>
 
-      <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {groups.map((group) => {
           const Icon = GROUP_ICONS[group.label] ?? Cpu
           return (

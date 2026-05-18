@@ -168,7 +168,16 @@ button.back-to-top-button {
    ============================================ */
 .skill-icon-mark,
 .skill-icon-orbit {
+  display: block;
   overflow: visible;
+}
+
+.skill-icon-mark {
+  object-fit: contain;
+}
+
+.skill-badge {
+  contain: layout paint style;
 }
 
 .skill-icon-custom-badge {
@@ -177,23 +186,23 @@ button.back-to-top-button {
   transform: scale(1.06);
 }
 
-.dark .skill-icon-mark,
 .dark svg.skill-orbit-glow {
   filter: drop-shadow(0 0 1.15px rgba(255, 255, 255, 0.5))
     drop-shadow(0 0 5px rgba(186, 230, 253, 0.28))
     drop-shadow(0 0 10px rgba(103, 232, 249, 0.16));
 }
 
-.light .skill-icon-mark,
 .light svg.skill-orbit-glow {
   filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.2))
     drop-shadow(0 0 3px rgba(0, 0, 0, 0.1))
     drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
+.skill-icon-mark,
+.skill-icon-custom-badge.skill-orbit-glow,
 .skills-page-lite .skill-icon-mark,
 .skills-page-lite svg.skill-orbit-glow {
-  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.1));
+  filter: none !important;
 }
 
 /* ============================================

@@ -51,9 +51,8 @@ export function SkillsPage() {
     ? 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent'
     : 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift'
 
-  const groupHaloClass = coarseEffects
-    ? 'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/8 opacity-70'
-    : 'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl transition-all duration-500 group-hover:bg-accent/25'
+  const groupHaloClass =
+    'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/8 opacity-70 transition-opacity duration-300 group-hover:opacity-100'
 
   const specialtySurfaceClass = coarseEffects
     ? 'rounded-2xl border border-border bg-background/85 p-5 transition-[border-color,box-shadow] duration-300 hover:border-accent/50'
@@ -85,7 +84,7 @@ export function SkillsPage() {
             description="From language fundamentals to deep-learning frameworks – the tools I reach for to ship products."
           />
 
-          <div className="mt-14">
+          <div className="mt-8 sm:mt-10">
             <SkillConstellation groups={resume.skills} coarseEffects={coarseEffects} />
           </div>
         </div>
@@ -122,7 +121,7 @@ export function SkillsPage() {
                   <div className="relative flex items-center gap-4">
                     <span
                       className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-hero-gradient bg-[length:200%_200%] text-white ${
-                        coarseEffects ? 'shadow-md' : 'shadow-glow animate-gradient-shift'
+                        coarseEffects ? 'shadow-sm' : 'shadow-md'
                       }`}
                     >
                       <Icon className="h-5 w-5" />
@@ -138,12 +137,11 @@ export function SkillsPage() {
                   </div>
 
                   <div className="relative mt-6 flex flex-wrap gap-2">
-                    {group.items.map((item, itemIdx) => (
+                    {group.items.map((item) => (
                       <SkillBadge
                         key={item}
                         label={item}
                         coarseEffects={coarseEffects}
-                        delay={coarseEffects ? 0 : itemIdx * 0.03}
                       />
                     ))}
                   </div>
