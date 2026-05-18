@@ -38,6 +38,8 @@ const CENTER = VIEW / 2
 const RING_RADII = [126, 188, 242, 286]
 const ROTATION_DURATIONS = [80, 100, 130, 160]
 const POPUP_DISMISS_MS = 2200
+const POPUP_EDGE_PADDING = 14
+const POPUP_VERTICAL_OFFSET = 10
 const SIZE_MORE = 1.4
 const NODE_HIT_R = Math.round(18 * 1.45 * SIZE_MORE)
 const NODE_ICON_BASE_PX = Math.round(15 * 1.45 * SIZE_MORE)
@@ -80,6 +82,7 @@ export function SkillConstellation({
   const stageRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const popupAnchorRef = useRef<HTMLDivElement>(null)
+  const popupCardRef = useRef<HTMLDivElement>(null)
   const anchorCircleRefs = useRef(new Map<string, SVGCircleElement>())
   const dismissTimerRef = useRef<number | null>(null)
   const popupNodeRef = useRef<RingNodeDatum | null>(null)
@@ -161,9 +164,22 @@ export function SkillConstellation({
     const circleRect = circle.getBoundingClientRect()
     const centerX = circleRect.left + circleRect.width / 2 - stageRect.left
     const centerY = circleRect.top + circleRect.height / 2 - stageRect.top
+    const popupWidth = popupCardRef.current?.offsetWidth ?? 0
+    const popupHeight = popupCardRef.current?.offsetHeight ?? 0
+    const minCenterX = POPUP_EDGE_PADDING + popupWidth / 2
+    const maxCenterX = stageRect.width - POPUP_EDGE_PADDING - popupWidth / 2
+    const clampedCenterX = popupWidth
+      ? Math.min(Math.max(centerX, minCenterX), maxCenterX)
+      : centerX
+    const shouldShowBelow = popupHeight
+      ? centerY - popupHeight - POPUP_VERTICAL_OFFSET < POPUP_EDGE_PADDING
+      : false
 
-    wrap.style.left = `${centerX}px`
+    wrap.style.left = `${clampedCenterX}px`
     wrap.style.top = `${centerY}px`
+    wrap.style.transform = shouldShowBelow
+      ? `translate(-50%, ${POPUP_VERTICAL_OFFSET}px)`
+      : `translate(-50%, calc(-100% - ${POPUP_VERTICAL_OFFSET}px))`
   }, [])
 
   useEffect(() => {
@@ -471,17 +487,19 @@ export function SkillConstellation({
           <AnimatePresence>
             {popup && (
               <motion.div
+                ref={popupCardRef}
                 key={popup.node.id}
                 initial={staticVisuals ? undefined : { opacity: 0, y: 6, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 4, scale: 0.98 }}
                 transition={{ duration: durations.fast, ease: easings.cinematic }}
+                className="max-w-[min(18rem,calc(100vw-2rem))]"
               >
                 <span
                   className={
                     staticVisuals
-                      ? 'inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground shadow-md'
-                      : 'inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card/95 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground shadow-md backdrop-blur-sm'
+                      ? 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md whitespace-normal'
+                      : 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card/95 px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md backdrop-blur-sm whitespace-normal'
                   }
                 >
                   {popup.node.label}
