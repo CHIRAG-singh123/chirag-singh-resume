@@ -54,6 +54,11 @@ function getCustomGlyphDataUri(kind: CustomSkillIconKind) {
   return uri
 }
 
+export function getSkillIconDataUri(glyph: SkillIconGlyph): string {
+  if (glyph.kind !== 'svg') return getCustomGlyphDataUri(glyph.kind)
+  return getSkillSvgIconDataUri(glyph.name, glyph.color)
+}
+
 export const SkillIcon = memo(function SkillIcon({
   fallback = null,
   glyph: providedGlyph,
@@ -74,7 +79,7 @@ export const SkillIcon = memo(function SkillIcon({
     if (tone === 'badge') {
       return (
         <img
-          src={getCustomGlyphDataUri(glyph.kind)}
+          src={getSkillIconDataUri(glyph)}
           alt=""
           aria-hidden
           draggable={false}

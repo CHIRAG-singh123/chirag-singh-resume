@@ -1,7 +1,8 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ProjectCard } from './ProjectCard'
+import { usePerfProfile } from '../lib/usePerfProfile'
 import type { Project } from '../lib/resume/types'
 import { durations, easings, springs } from '../motion'
 
@@ -14,6 +15,7 @@ interface ProjectCarouselProps {
 const VISIBLE_DESKTOP = 3
 const VISIBLE_TABLET = 2
 const VISIBLE_MOBILE = 1
+const COARSE_INTERVAL_MS = 3600
 
 function getVisibleCount(): number {
   if (typeof window === 'undefined') return VISIBLE_DESKTOP
@@ -28,6 +30,9 @@ export function ProjectCarousel({
   intervalMs = 2500,
 }: ProjectCarouselProps) {
   const shouldReduceMotion = useReducedMotion()
+  const { coarseEffects } = usePerfProfile()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(rootRef, { amount: 0.25 })
   const [startIdx, setStartIdx] = useState(0)
   const [visibleCount, setVisibleCount] = useState<number>(VISIBLE_DESKTOP)
   const [paused, setPaused] = useState(false)
@@ -44,12 +49,13 @@ export function ProjectCarousel({
   }, [])
 
   useEffect(() => {
-    if (paused || hasExpanded || shouldReduceMotion || total <= visibleCount) return
+    if (paused || hasExpanded || shouldReduceMotion || !inView || total <= visibleCount) return
+    const effectiveIntervalMs = coarseEffects ? Math.max(intervalMs, COARSE_INTERVAL_MS) : intervalMs
     const id = window.setInterval(() => {
       setStartIdx((s) => (s + 1) % total)
-    }, intervalMs)
+    }, effectiveIntervalMs)
     return () => window.clearInterval(id)
-  }, [paused, hasExpanded, shouldReduceMotion, total, visibleCount, intervalMs])
+  }, [paused, hasExpanded, shouldReduceMotion, inView, total, visibleCount, intervalMs, coarseEffects])
 
   const handleExpandChange = useCallback((projectName: string, expanded: boolean) => {
     if (expanded) {
@@ -64,15 +70,22 @@ export function ProjectCarousel({
     return projects[(startIdx + i) % total]
   })
 
-  const slideTransition = {
-    layout: { duration: durations.medium, ease: easings.cinematic },
-    duration: durations.medium,
-    ease: easings.cinematic,
-  } as const
+  const slideTransition = coarseEffects
+    ? {
+        duration: durations.fast,
+        ease: easings.cinematic,
+      }
+    : {
+        layout: { duration: durations.medium, ease: easings.cinematic },
+        duration: durations.medium,
+        ease: easings.cinematic,
+      }
 
   return (
     <div
+      ref={rootRef}
       className="relative"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '560px' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -87,30 +100,37 @@ export function ProjectCarousel({
               : ''
         }`}
       >
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode={coarseEffects ? 'sync' : 'popLayout'} initial={false}>
           {visible.map((project) => (
             <motion.div
               key={project.name}
-              layout
+              layout={!coarseEffects}
               initial={
                 shouldReduceMotion
                   ? { opacity: 0 }
-                  : { opacity: 0, x: 96, filter: 'blur(10px)', scale: 0.96 }
+                  : coarseEffects
+                    ? { opacity: 0, x: 48 }
+                    : { opacity: 0, x: 96, scale: 0.96 }
               }
               animate={
                 shouldReduceMotion
                   ? { opacity: 1 }
-                  : { opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }
+                  : coarseEffects
+                    ? { opacity: 1, x: 0 }
+                    : { opacity: 1, x: 0, scale: 1 }
               }
               exit={
                 shouldReduceMotion
                   ? { opacity: 0 }
-                  : { opacity: 0, x: -96, filter: 'blur(10px)', scale: 0.96 }
+                  : coarseEffects
+                    ? { opacity: 0, x: -48 }
+                    : { opacity: 0, x: -96, scale: 0.96 }
               }
               transition={shouldReduceMotion ? { duration: 0.18 } : slideTransition}
               className="flex h-full min-h-[26rem]"
             >
               <ProjectCard
+                coarseEffects={coarseEffects}
                 project={project}
                 index={0}
                 githubUrl={githubMap[project.name]}
@@ -128,9 +148,15 @@ export function ProjectCarousel({
             type="button"
             onClick={() => setStartIdx((s) => (s - 1 + total) % total)}
             aria-label="Previous projects"
-            whileHover={{ scale: 1.1, x: -2, transition: springs.hover }}
+            whileHover={
+              coarseEffects
+                ? { scale: 1.04, x: -1, transition: springs.hover }
+                : { scale: 1.1, x: -2, transition: springs.hover }
+            }
             whileTap={{ scale: 0.9, transition: springs.tap }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground backdrop-blur transition-colors hover:border-accent hover:text-accent"
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors hover:border-accent hover:text-accent ${
+              coarseEffects ? '' : 'backdrop-blur'
+            }`}
           >
             <ChevronLeft className="h-4 w-4" />
           </motion.button>
@@ -147,11 +173,16 @@ export function ProjectCarousel({
                   aria-selected={isActive}
                   aria-label={`Show ${projectAtIdx?.name ?? `slide ${i + 1}`}`}
                   onClick={() => setStartIdx(i)}
-                  whileHover={{ scale: 1.15, transition: springs.hover }}
+                  whileHover={{
+                    scale: coarseEffects ? 1.08 : 1.15,
+                    transition: springs.hover,
+                  }}
                   whileTap={{ scale: 0.9, transition: springs.tap }}
                   className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
                     isActive
-                      ? 'w-8 bg-accent shadow-glow'
+                      ? coarseEffects
+                        ? 'w-8 bg-accent shadow-sm'
+                        : 'w-8 bg-accent shadow-glow'
                       : 'w-2.5 bg-border hover:bg-accent/50'
                   }`}
                 />
@@ -163,9 +194,15 @@ export function ProjectCarousel({
             type="button"
             onClick={() => setStartIdx((s) => (s + 1) % total)}
             aria-label="Next projects"
-            whileHover={{ scale: 1.1, x: 2, transition: springs.hover }}
+            whileHover={
+              coarseEffects
+                ? { scale: 1.04, x: 1, transition: springs.hover }
+                : { scale: 1.1, x: 2, transition: springs.hover }
+            }
             whileTap={{ scale: 0.9, transition: springs.tap }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground backdrop-blur transition-colors hover:border-accent hover:text-accent"
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors hover:border-accent hover:text-accent ${
+              coarseEffects ? '' : 'backdrop-blur'
+            }`}
           >
             <ChevronRight className="h-4 w-4" />
           </motion.button>

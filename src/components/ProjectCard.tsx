@@ -1,12 +1,13 @@
-import { AnimatePresence, motion, useMotionTemplate, useMotionValue } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, ChevronDown, ExternalLink } from 'lucide-react'
-import { useEffect, useState, type MouseEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from './BrandIcons'
 import { ProjectStackChip } from './ProjectStackChip'
 import { projectSlug } from '../data/resume'
 import { prefetchRoute } from '../lib/routes/prefetch'
 import type { Project } from '../lib/resume/types'
+import { usePerfProfile } from '../lib/usePerfProfile'
 import {
   cinematicTransition,
   durations,
@@ -19,6 +20,7 @@ import {
 const COLLAPSED_BULLETS = 2
 
 interface ProjectCardProps {
+  coarseEffects?: boolean
   project: Project
   index: number
   githubUrl?: string
@@ -27,15 +29,15 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({
+  coarseEffects = false,
   project,
   index,
   githubUrl,
   disableReveal = false,
   onExpandChange,
 }: ProjectCardProps) {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
+  const { coarseEffects: perfCoarseEffects } = usePerfProfile()
+  const lightEffects = coarseEffects || perfCoarseEffects
   const [expanded, setExpanded] = useState(false)
   const hasMoreBullets = project.bullets.length > COLLAPSED_BULLETS
   const visibleBullets = project.bullets.slice(0, COLLAPSED_BULLETS)
@@ -51,14 +53,6 @@ export function ProjectCard({
     }
   }, [onExpandChange])
 
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - rect.left)
-    mouseY.set(e.clientY - rect.top)
-  }
-
-  const spotlight = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, rgba(168, 218, 220, 0.18), transparent 70%)`
-
   return (
     <motion.article
       variants={disableReveal ? undefined : sectionVariants}
@@ -66,13 +60,17 @@ export function ProjectCard({
       whileInView={disableReveal ? undefined : 'show'}
       viewport={disableReveal ? undefined : { once: viewport.once, amount: 0.2 }}
       transition={disableReveal ? undefined : cinematicTransition(durations.medium, index * 0.08)}
-      whileHover={{ y: -6, transition: springs.hover }}
-      onMouseMove={handleMouseMove}
-      className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
+      whileHover={{ y: lightEffects ? -3 : -6, transition: springs.hover }}
+      className={`group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-[border-color,box-shadow,transform] duration-300 hover:border-accent/50 ${
+        lightEffects ? 'hover:shadow-lg' : 'hover:shadow-xl'
+      }`}
     >
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: spotlight }}
+      <div
+        className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+          lightEffects
+            ? 'bg-[radial-gradient(circle_at_50%_18%,rgba(168,218,220,0.08),transparent_68%)]'
+            : 'bg-[radial-gradient(circle_at_50%_18%,rgba(168,218,220,0.14),transparent_70%)]'
+        }`}
       />
 
       <div className="relative flex items-start justify-between gap-4">
@@ -95,7 +93,11 @@ export function ProjectCard({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Open ${project.name} on GitHub`}
-            whileHover={{ y: -2, scale: 1.04, transition: springs.hover }}
+            whileHover={
+              lightEffects
+                ? { y: -1, transition: springs.hover }
+                : { y: -2, scale: 1.04, transition: springs.hover }
+            }
             whileTap={{ scale: 0.96, transition: springs.tap }}
             className="group/link inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
           >
@@ -146,7 +148,7 @@ export function ProjectCard({
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls={`project-${project.name}-details`}
-          whileHover={{ x: 2, transition: springs.hover }}
+          whileHover={{ x: lightEffects ? 1 : 2, transition: springs.hover }}
           whileTap={{ scale: 0.96, transition: springs.tap }}
           className="relative mt-3 inline-flex items-center gap-1.5 self-start rounded-full text-xs font-semibold uppercase tracking-wider text-accent transition-colors hover:text-accent/80"
         >

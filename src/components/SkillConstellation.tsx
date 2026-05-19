@@ -15,7 +15,7 @@ import { getOrbitSkillIconScale } from '../lib/orbitIconScale'
 import { getSkillIcon } from '../lib/skillBrandIcons'
 import type { SkillGroup } from '../lib/resume/types'
 import { durations, easings } from '../motion'
-import { SkillIcon } from './SkillIcon'
+import { getSkillIconDataUri, SkillIcon } from './SkillIcon'
 import { TypingText } from './TypingText'
 
 interface SkillConstellationProps {
@@ -52,6 +52,7 @@ function polar(cx: number, cy: number, r: number, angleRad: number) {
 
 interface RingNodeDatum {
   fallbackIcon: LucideIcon
+  iconHref: string | null
   groupLabel: string
   icon: SkillIconGlyph | null
   iconScale: number
@@ -113,11 +114,14 @@ export function SkillConstellation({
           nodes: group.items.map((item, itemIndex) => {
             const angle = (itemIndex / nodeCount) * Math.PI * 2 - Math.PI / 2
             const [x, y] = polar(0, 0, radius, angle)
+            const icon = getSkillIcon(item)
 
             return {
               fallbackIcon,
               groupLabel: group.label,
-              icon: getSkillIcon(item),
+              icon,
+              iconHref:
+                icon && !(icon.kind === 'svg' && icon.color) ? getSkillIconDataUri(icon) : null,
               iconScale: getOrbitSkillIconScale(item),
               id: `${group.label}-${item}`,
               label: item,
@@ -390,7 +394,18 @@ export function SkillConstellation({
                             />
                           ) : null}
                           <g className={`orbit-node-scale ${active ? 'is-active' : ''}`}>
-                            {node.icon ? (
+                            {node.iconHref ? (
+                              <image
+                                href={node.iconHref}
+                                x={-iconOffset}
+                                y={-iconOffset}
+                                width={iconSize}
+                                height={iconSize}
+                                preserveAspectRatio="xMidYMid meet"
+                                className="skill-icon-mark max-h-full max-w-full shrink-0"
+                                aria-hidden="true"
+                              />
+                            ) : node.icon ? (
                               <SkillIcon
                                 glyph={node.icon}
                                 tone="orbit"

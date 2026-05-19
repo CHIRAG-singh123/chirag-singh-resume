@@ -7,6 +7,7 @@ import { ProjectCard } from '../components/ProjectCard'
 import { SectionHeading } from '../components/SectionHeading'
 import { PROJECT_LINKS, resume } from '../data/resume'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
+import { usePerfProfile } from '../lib/usePerfProfile'
 import { durations, easings, springs } from '../motion'
 
 const FEATURED_TAGS_PER_PROJECT = 2
@@ -22,17 +23,18 @@ const tagRowVariants: Variants = {
 }
 
 const tagItemVariants: Variants = {
-  hidden: { opacity: 0, y: 10, scale: 0.9, filter: 'blur(4px)' },
+  hidden: { opacity: 0, y: 8, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    filter: 'blur(0px)',
     transition: { duration: durations.fast, ease: easings.cinematic },
   },
 }
 
 export function ProjectsPage() {
+  const { coarseEffects } = usePerfProfile()
+
   useDocumentHead({
     title: `Projects — ${resume.personal.name}`,
     description:
@@ -56,9 +58,13 @@ export function ProjectsPage() {
   }, [activeTag])
 
   return (
-    <PageTransition>
+    <PageTransition variant="transformOnly">
       <section className="relative overflow-hidden">
-        <GradientBlobs variant="soft" />
+        <GradientBlobs
+          variant="soft"
+          density={coarseEffects ? 'light' : 'normal'}
+          animated={!coarseEffects}
+        />
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Projects"
@@ -76,7 +82,7 @@ export function ProjectsPage() {
 
           <motion.div
             variants={tagRowVariants}
-            initial="hidden"
+            initial={coarseEffects ? false : 'hidden'}
             animate="show"
             className="mt-10 flex flex-wrap justify-center gap-2"
             aria-label="Filter projects by featured technology"
@@ -87,31 +93,31 @@ export function ProjectsPage() {
                 <motion.button
                   type="button"
                   key={tag}
-                  variants={tagItemVariants}
+                  variants={coarseEffects ? undefined : tagItemVariants}
                   onClick={() => setActiveTag(tag)}
-                  whileHover={{ y: -2, scale: 1.04, transition: springs.hover }}
+                  whileHover={
+                    coarseEffects
+                      ? { y: -1, transition: springs.hover }
+                      : { y: -2, scale: 1.04, transition: springs.hover }
+                  }
                   whileTap={{ scale: 0.94, transition: springs.tap }}
                   aria-pressed={active}
-                  className={`relative rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-300 ${
+                  className={`relative isolate inline-flex items-center justify-center rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-widest transition-[color,border-color,background-color,box-shadow] duration-300 ${
                     active
-                      ? 'text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'border-transparent text-[#17171a]'
+                      : 'border-border bg-card/70 text-muted-foreground hover:border-accent/50 hover:bg-accent/10 hover:text-foreground'
                   }`}
                 >
                   {active && (
                     <motion.span
                       layoutId="project-tag"
                       transition={springs.layout}
-                      className="absolute inset-0 -z-10 rounded-full bg-hero-gradient bg-[length:200%_200%] shadow-glow animate-gradient-shift"
+                      className={`absolute inset-0 -z-10 rounded-full bg-hero-gradient bg-[length:200%_200%] ${
+                        coarseEffects ? 'shadow-md' : 'shadow-glow animate-gradient-shift'
+                      }`}
                     />
                   )}
-                  <span
-                    className={
-                      active
-                        ? ''
-                        : 'rounded-full border border-border bg-card/70 px-3 py-1 -m-3 transition-colors duration-300 hover:border-accent/50 hover:bg-accent/10'
-                    }
-                  >
+                  <span className="relative z-10">
                     {tag}
                   </span>
                 </motion.button>
@@ -123,36 +129,35 @@ export function ProjectsPage() {
 
       <AnimatedSection className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
         <motion.div
-          layout
-          transition={springs.layout}
+          layout={!coarseEffects}
+          transition={coarseEffects ? undefined : springs.layout}
           className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {filtered.map((project, idx) => (
               <motion.div
                 key={project.name}
-                layout
-                initial={{ opacity: 0, y: 24, scale: 0.96, filter: 'blur(6px)' }}
+                layout={!coarseEffects}
+                initial={coarseEffects ? { opacity: 0, y: 14 } : { opacity: 0, y: 20, scale: 0.98 }}
                 animate={{
                   opacity: 1,
                   y: 0,
-                  scale: 1,
-                  filter: 'blur(0px)',
+                  ...(coarseEffects ? {} : { scale: 1 }),
                   transition: {
-                    duration: durations.base,
+                    duration: coarseEffects ? durations.fast : durations.base,
                     ease: easings.emphasized,
-                    delay: Math.min(idx, 5) * 0.05,
+                    delay: coarseEffects ? 0 : Math.min(idx, 5) * 0.04,
                   },
                 }}
                 exit={{
                   opacity: 0,
                   y: -12,
-                  scale: 0.96,
-                  filter: 'blur(6px)',
+                  ...(coarseEffects ? {} : { scale: 0.98 }),
                   transition: { duration: durations.fast, ease: easings.smooth },
                 }}
               >
                 <ProjectCard
+                  coarseEffects={coarseEffects}
                   project={project}
                   index={idx}
                   githubUrl={PROJECT_LINKS[project.name]}
@@ -167,19 +172,17 @@ export function ProjectsPage() {
           {filtered.length === 0 && (
             <motion.div
               key={`empty-${activeTag}`}
-              initial={{ opacity: 0, y: 16, scale: 0.97, filter: 'blur(6px)' }}
+              initial={coarseEffects ? { opacity: 0, y: 10 } : { opacity: 0, y: 16, scale: 0.98 }}
               animate={{
                 opacity: 1,
                 y: 0,
-                scale: 1,
-                filter: 'blur(0px)',
+                ...(coarseEffects ? {} : { scale: 1 }),
                 transition: { duration: durations.base, ease: easings.emphasized },
               }}
               exit={{
                 opacity: 0,
                 y: -8,
-                scale: 0.98,
-                filter: 'blur(4px)',
+                ...(coarseEffects ? {} : { scale: 0.98 }),
                 transition: { duration: durations.fast, ease: easings.smooth },
               }}
               className="mt-12 rounded-3xl border border-dashed border-border bg-card/60 p-10 text-center text-muted-foreground"
