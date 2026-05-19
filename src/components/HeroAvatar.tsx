@@ -2,7 +2,8 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CONTACT_LINKS } from '../data/resume'
 import { durations, easings } from '../motion'
-import { SkillIcon } from './SkillIcon'
+import { usePerfProfile } from '../lib/usePerfProfile'
+import { SkillBrandMark } from './SkillBrandMark'
 
 const buildSrcSet = (sources: { src: string; width: number }[]) =>
   sources.map((s) => `${s.src} ${s.width}w`).join(', ')
@@ -110,6 +111,7 @@ const SECONDARY_ORBIT_LOGOS: OrbitLogo[] = [
 
 export function HeroAvatar() {
   const shouldReduceMotion = useReducedMotion() ?? false
+  const { coarseEffects } = usePerfProfile()
   const portrait = CONTACT_LINKS.profileImage
   const rootRef = useRef<HTMLDivElement>(null)
   const popupAnchorRef = useRef<HTMLDivElement>(null)
@@ -119,13 +121,14 @@ export function HeroAvatar() {
   const popupLogoRef = useRef<OrbitLogo | null>(null)
   const rafPopupRef = useRef<number>(0)
   const [popup, setPopup] = useState<OrbitLogo | null>(null)
-  const primaryCounterSpinClass = shouldReduceMotion
+  const staticVisuals = shouldReduceMotion || coarseEffects
+  const primaryCounterSpinClass = staticVisuals
     ? ''
     : 'motion-reduce:animate-none animate-[spin_28s_linear_infinite] [animation-direction:reverse]'
-  const secondaryCounterSpinClass = shouldReduceMotion
+  const secondaryCounterSpinClass = staticVisuals
     ? ''
     : 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite]'
-  const orbitSpinEnabled = !shouldReduceMotion
+  const orbitSpinEnabled = !staticVisuals
 
   const syncPopupAnchor = useCallback((logo: OrbitLogo) => {
     const root = rootRef.current
@@ -220,15 +223,21 @@ export function HeroAvatar() {
       initial={{ opacity: 0, scale: 0.8, rotate: shouldReduceMotion ? 0 : -6 }}
       animate={{ opacity: 1, scale: 1, rotate: 0 }}
       transition={{ duration: durations.slow, ease: easings.cinematic }}
-      className="relative mx-auto aspect-square w-64 sm:w-80 md:w-[22rem]"
+      className="relative mx-auto aspect-square w-64 overflow-visible sm:w-80 md:w-[22rem]"
     >
       <div
-        className="absolute inset-[-12%] rounded-full bg-hero-gradient bg-[length:300%_300%] opacity-40 blur-3xl animate-gradient-shift"
+        className={`absolute inset-[-12%] rounded-full bg-hero-gradient bg-[length:300%_300%] ${
+          coarseEffects
+            ? 'opacity-18 blur-xl'
+            : 'opacity-40 blur-3xl animate-gradient-shift'
+        }`}
         aria-hidden="true"
       />
 
       <div
-        className="pointer-events-none absolute inset-0 will-change-transform motion-reduce:animate-none animate-[spin_28s_linear_infinite]"
+        className={`pointer-events-none absolute inset-0 will-change-transform ${
+          orbitSpinEnabled ? 'motion-reduce:animate-none animate-[spin_28s_linear_infinite]' : ''
+        }`}
       >
         {PRIMARY_ORBIT_LOGOS.map((logo) => (
           <button
@@ -246,11 +255,9 @@ export function HeroAvatar() {
             className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
           >
             <span className={primaryCounterSpinClass}>
-              <SkillIcon
+              <SkillBrandMark
                 label={logo.label}
-                tone="orbit"
                 className={`${logo.sizeClass} shrink-0`}
-                aria-hidden
               />
             </span>
           </button>
@@ -258,7 +265,11 @@ export function HeroAvatar() {
       </div>
 
       <div
-        className="pointer-events-none absolute inset-[-15%] will-change-transform motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]"
+        className={`pointer-events-none absolute inset-[-15%] will-change-transform ${
+          orbitSpinEnabled
+            ? 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]'
+            : ''
+        }`}
       >
         {SECONDARY_ORBIT_LOGOS.map((logo) => (
           <button
@@ -276,11 +287,9 @@ export function HeroAvatar() {
             className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
           >
             <span className={secondaryCounterSpinClass}>
-              <SkillIcon
+              <SkillBrandMark
                 label={logo.label}
-                tone="orbit"
                 className={`${logo.sizeClass} shrink-0`}
-                aria-hidden
               />
             </span>
           </button>
@@ -329,7 +338,13 @@ export function HeroAvatar() {
               transition={{ duration: durations.fast, ease: easings.cinematic }}
               className="max-w-[min(18rem,calc(100vw-2rem))]"
             >
-              <span className="inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card/95 px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md backdrop-blur-sm whitespace-normal">
+              <span
+                className={
+                  coarseEffects
+                    ? 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md whitespace-normal'
+                    : 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card/95 px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md backdrop-blur-sm whitespace-normal'
+                }
+              >
                 {popup.popupLabel}
               </span>
             </motion.div>
