@@ -11,6 +11,10 @@ const buildSrcSet = (sources: { src: string; width: number }[]) =>
 const POPUP_DISMISS_MS = 2200
 const POPUP_EDGE_PADDING = 12
 const POPUP_VERTICAL_OFFSET = 10
+const ORBIT_REVEAL_DELAY_MS = 48
+const ORBIT_REVEAL_DELAY_COARSE_MS = 96
+const PRIMARY_ORBIT_REVEAL_BATCH = 4
+const SECONDARY_ORBIT_REVEAL_BATCH = 4
 
 interface OrbitLogo {
   label: string
@@ -114,13 +118,19 @@ export function HeroAvatar() {
   const { coarseEffects } = usePerfProfile()
   const portrait = CONTACT_LINKS.profileImage
   const rootRef = useRef<HTMLDivElement>(null)
+  const portraitRef = useRef<HTMLImageElement>(null)
   const popupAnchorRef = useRef<HTMLDivElement>(null)
   const popupCardRef = useRef<HTMLDivElement>(null)
   const logoRefs = useRef(new Map<string, HTMLButtonElement>())
   const dismissTimerRef = useRef<number | null>(null)
+  const orbitRevealTimerRef = useRef<number | null>(null)
   const popupLogoRef = useRef<OrbitLogo | null>(null)
   const rafPopupRef = useRef<number>(0)
+  const orbitRevealFrameRef = useRef<number>(0)
   const [popup, setPopup] = useState<OrbitLogo | null>(null)
+  const [portraitReady, setPortraitReady] = useState(false)
+  const [visiblePrimaryCount, setVisiblePrimaryCount] = useState(0)
+  const [visibleSecondaryCount, setVisibleSecondaryCount] = useState(0)
   const staticVisuals = shouldReduceMotion || coarseEffects
   const primaryCounterSpinClass = staticVisuals
     ? ''
@@ -129,6 +139,10 @@ export function HeroAvatar() {
     ? ''
     : 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite]'
   const orbitSpinEnabled = !staticVisuals
+
+  useEffect(() => {
+    if (portraitRef.current?.complete) setPortraitReady(true)
+  }, [])
 
   const syncPopupAnchor = useCallback((logo: OrbitLogo) => {
     const root = rootRef.current
@@ -191,10 +205,58 @@ export function HeroAvatar() {
   useEffect(
     () => () => {
       if (dismissTimerRef.current !== null) window.clearTimeout(dismissTimerRef.current)
+      if (orbitRevealTimerRef.current !== null) window.clearTimeout(orbitRevealTimerRef.current)
       if (rafPopupRef.current) cancelAnimationFrame(rafPopupRef.current)
+      if (orbitRevealFrameRef.current) cancelAnimationFrame(orbitRevealFrameRef.current)
     },
     [],
   )
+
+  useEffect(() => {
+    if (!portraitReady) {
+      setVisiblePrimaryCount(0)
+      setVisibleSecondaryCount(0)
+      return
+    }
+
+    const stepDelay = coarseEffects ? ORBIT_REVEAL_DELAY_COARSE_MS : ORBIT_REVEAL_DELAY_MS
+    const revealSteps = [
+      () => setVisiblePrimaryCount(Math.min(PRIMARY_ORBIT_REVEAL_BATCH, PRIMARY_ORBIT_LOGOS.length)),
+      () => setVisiblePrimaryCount(PRIMARY_ORBIT_LOGOS.length),
+      () =>
+        setVisibleSecondaryCount(
+          Math.min(SECONDARY_ORBIT_REVEAL_BATCH, SECONDARY_ORBIT_LOGOS.length),
+        ),
+      () => setVisibleSecondaryCount(SECONDARY_ORBIT_LOGOS.length),
+    ]
+
+    setVisiblePrimaryCount(0)
+    setVisibleSecondaryCount(0)
+
+    const runRevealStep = (index: number) => {
+      revealSteps[index]()
+      if (index >= revealSteps.length - 1) return
+
+      orbitRevealTimerRef.current = window.setTimeout(() => {
+        orbitRevealFrameRef.current = requestAnimationFrame(() => runRevealStep(index + 1))
+      }, stepDelay)
+    }
+
+    orbitRevealFrameRef.current = requestAnimationFrame(() => {
+      orbitRevealFrameRef.current = requestAnimationFrame(() => runRevealStep(0))
+    })
+
+    return () => {
+      if (orbitRevealTimerRef.current !== null) {
+        window.clearTimeout(orbitRevealTimerRef.current)
+        orbitRevealTimerRef.current = null
+      }
+      if (orbitRevealFrameRef.current) {
+        cancelAnimationFrame(orbitRevealFrameRef.current)
+        orbitRevealFrameRef.current = 0
+      }
+    }
+  }, [coarseEffects, portraitReady])
 
   function showPopup(logo: OrbitLogo) {
     if (dismissTimerRef.current !== null) {
@@ -234,67 +296,71 @@ export function HeroAvatar() {
         aria-hidden="true"
       />
 
-      <div
-        className={`pointer-events-none absolute inset-0 will-change-transform ${
-          orbitSpinEnabled ? 'motion-reduce:animate-none animate-[spin_28s_linear_infinite]' : ''
-        }`}
-      >
-        {PRIMARY_ORBIT_LOGOS.map((logo) => (
-          <button
-            key={logo.label}
-            ref={(element) => {
-              if (element) logoRefs.current.set(logo.label, element)
-              else logoRefs.current.delete(logo.label)
-            }}
-            type="button"
-            onMouseEnter={() => showPopup(logo)}
-            onMouseLeave={() => clearPopup(logo.label)}
-            onFocus={() => showPopup(logo)}
-            onBlur={() => clearPopup(logo.label)}
-            aria-label={logo.popupLabel}
-            className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
-          >
-            <span className={primaryCounterSpinClass}>
-              <SkillBrandMark
-                label={logo.label}
-                className={`${logo.sizeClass} shrink-0`}
-              />
-            </span>
-          </button>
-        ))}
-      </div>
+      {visiblePrimaryCount > 0 ? (
+        <div
+          className={`pointer-events-none absolute inset-0 will-change-transform ${
+            orbitSpinEnabled ? 'motion-reduce:animate-none animate-[spin_28s_linear_infinite]' : ''
+          }`}
+        >
+          {PRIMARY_ORBIT_LOGOS.slice(0, visiblePrimaryCount).map((logo) => (
+            <button
+              key={logo.label}
+              ref={(element) => {
+                if (element) logoRefs.current.set(logo.label, element)
+                else logoRefs.current.delete(logo.label)
+              }}
+              type="button"
+              onMouseEnter={() => showPopup(logo)}
+              onMouseLeave={() => clearPopup(logo.label)}
+              onFocus={() => showPopup(logo)}
+              onBlur={() => clearPopup(logo.label)}
+              aria-label={logo.popupLabel}
+              className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
+            >
+              <span className={primaryCounterSpinClass}>
+                <SkillBrandMark
+                  label={logo.label}
+                  className={`${logo.sizeClass} shrink-0`}
+                />
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
-      <div
-        className={`pointer-events-none absolute inset-[-15%] will-change-transform ${
-          orbitSpinEnabled
-            ? 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]'
-            : ''
-        }`}
-      >
-        {SECONDARY_ORBIT_LOGOS.map((logo) => (
-          <button
-            key={logo.label}
-            ref={(element) => {
-              if (element) logoRefs.current.set(logo.label, element)
-              else logoRefs.current.delete(logo.label)
-            }}
-            type="button"
-            onMouseEnter={() => showPopup(logo)}
-            onMouseLeave={() => clearPopup(logo.label)}
-            onFocus={() => showPopup(logo)}
-            onBlur={() => clearPopup(logo.label)}
-            aria-label={logo.popupLabel}
-            className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
-          >
-            <span className={secondaryCounterSpinClass}>
-              <SkillBrandMark
-                label={logo.label}
-                className={`${logo.sizeClass} shrink-0`}
-              />
-            </span>
-          </button>
-        ))}
-      </div>
+      {visibleSecondaryCount > 0 ? (
+        <div
+          className={`pointer-events-none absolute inset-[-15%] will-change-transform ${
+            orbitSpinEnabled
+              ? 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite] [animation-direction:reverse]'
+              : ''
+          }`}
+        >
+          {SECONDARY_ORBIT_LOGOS.slice(0, visibleSecondaryCount).map((logo) => (
+            <button
+              key={logo.label}
+              ref={(element) => {
+                if (element) logoRefs.current.set(logo.label, element)
+                else logoRefs.current.delete(logo.label)
+              }}
+              type="button"
+              onMouseEnter={() => showPopup(logo)}
+              onMouseLeave={() => clearPopup(logo.label)}
+              onFocus={() => showPopup(logo)}
+              onBlur={() => clearPopup(logo.label)}
+              aria-label={logo.popupLabel}
+              className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
+            >
+              <span className={secondaryCounterSpinClass}>
+                <SkillBrandMark
+                  label={logo.label}
+                  className={`${logo.sizeClass} shrink-0`}
+                />
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="absolute inset-6 overflow-hidden rounded-full border border-border bg-card shadow-xl">
         <picture>
@@ -309,6 +375,7 @@ export function HeroAvatar() {
             sizes={portrait.sizes}
           />
           <img
+            ref={portraitRef}
             src={portrait.fallback}
             alt={portrait.alt}
             width={portrait.width}
@@ -316,6 +383,8 @@ export function HeroAvatar() {
             fetchPriority="high"
             loading="eager"
             decoding="async"
+            onLoad={() => setPortraitReady(true)}
+            onError={() => setPortraitReady(true)}
             className="h-full w-full object-cover"
           />
         </picture>
