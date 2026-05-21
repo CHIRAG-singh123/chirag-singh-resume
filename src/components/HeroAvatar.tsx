@@ -131,14 +131,15 @@ export function HeroAvatar() {
   const [portraitReady, setPortraitReady] = useState(false)
   const [visiblePrimaryCount, setVisiblePrimaryCount] = useState(0)
   const [visibleSecondaryCount, setVisibleSecondaryCount] = useState(0)
-  const staticVisuals = shouldReduceMotion || coarseEffects
-  const primaryCounterSpinClass = staticVisuals
+  const motionReduced = shouldReduceMotion
+  const staticVisuals = motionReduced || coarseEffects
+  const primaryCounterSpinClass = motionReduced
     ? ''
     : 'motion-reduce:animate-none animate-[spin_28s_linear_infinite] [animation-direction:reverse]'
-  const secondaryCounterSpinClass = staticVisuals
+  const secondaryCounterSpinClass = motionReduced
     ? ''
     : 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite]'
-  const orbitSpinEnabled = !staticVisuals
+  const orbitSpinEnabled = !motionReduced
 
   useEffect(() => {
     if (portraitRef.current?.complete) setPortraitReady(true)
