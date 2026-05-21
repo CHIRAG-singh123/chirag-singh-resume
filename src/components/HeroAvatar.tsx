@@ -132,7 +132,6 @@ export function HeroAvatar() {
   const [visiblePrimaryCount, setVisiblePrimaryCount] = useState(0)
   const [visibleSecondaryCount, setVisibleSecondaryCount] = useState(0)
   const motionReduced = shouldReduceMotion
-  const staticVisuals = motionReduced || coarseEffects
   const primaryCounterSpinClass = motionReduced
     ? ''
     : 'motion-reduce:animate-none animate-[spin_28s_linear_infinite] [animation-direction:reverse]'
