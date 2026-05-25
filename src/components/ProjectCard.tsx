@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowUpRight, ExternalLink } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, Github, Layers3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from './BrandIcons'
 import { ProjectStackChip } from './ProjectStackChip'
@@ -15,7 +15,7 @@ import {
   viewport,
 } from '../motion'
 
-const COLLAPSED_BULLETS = 2
+const DEFAULT_BULLET_LIMIT = 2
 const DEFAULT_STACK_LIMIT = 4
 
 interface ProjectCardProps {
@@ -35,16 +35,18 @@ export function ProjectCard({
   index,
   githubUrl,
   disableReveal = false,
-  bulletLimit = COLLAPSED_BULLETS,
+  bulletLimit = DEFAULT_BULLET_LIMIT,
   stackLimit = DEFAULT_STACK_LIMIT,
   variant = 'default',
 }: ProjectCardProps) {
-  const lightEffects = coarseEffects
   const projectPath = `/projects/${projectSlug(project.name)}`
   const visibleBullets = project.bullets.slice(0, bulletLimit)
   const visibleStack = project.stack.slice(0, stackLimit)
+  const hiddenStackCount = project.stack.length - visibleStack.length
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
+  const primaryStack = project.stack[0] ?? 'Project'
+  const secondaryStack = project.stack[1] ?? project.tagline
 
   return (
     <motion.article
@@ -52,46 +54,40 @@ export function ProjectCard({
       initial={disableReveal ? false : 'hidden'}
       whileInView={disableReveal ? undefined : 'show'}
       viewport={disableReveal ? undefined : { once: viewport.once, amount: 0.2 }}
-      transition={disableReveal ? undefined : cinematicTransition(durations.medium, index * 0.06)}
-      whileHover={{
-        y: lightEffects ? -3 : -6,
-        transition: springs.hover,
-      }}
-      className={`group relative flex h-full w-full flex-col overflow-hidden border border-border bg-card shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:border-accent/45 ${
-        isFeatured
-          ? 'rounded-[1.75rem] p-6 sm:p-7'
-          : isCompact
-            ? 'rounded-[1.6rem] p-5'
-            : 'rounded-2xl p-6'
-      } ${lightEffects ? 'hover:shadow-lg' : 'hover:shadow-xl'}`}
+      transition={disableReveal ? undefined : cinematicTransition(durations.medium, index * 0.05)}
+      whileHover={
+        coarseEffects
+          ? { y: -2, transition: springs.hover }
+          : { y: -5, transition: springs.hover }
+      }
+      className={`group relative isolate flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:border-accent/55 ${
+        coarseEffects ? 'hover:shadow-md' : 'hover:shadow-lg'
+      } ${isFeatured ? 'p-6 sm:p-7' : isCompact ? 'p-5' : 'p-6'}`}
     >
       <div
-        className={`pointer-events-none absolute inset-x-0 top-0 h-1 ${
-          isFeatured
-            ? 'bg-hero-gradient opacity-100'
-            : 'bg-gradient-to-r from-accent via-accent-secondary to-chart-tertiary opacity-80'
-        }`}
-        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-hero-gradient opacity-90"
+        aria-hidden
       />
-
       <div
-        className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
-          lightEffects
-            ? 'bg-[radial-gradient(circle_at_top,rgba(168,218,220,0.08),transparent_68%)]'
-            : 'bg-[radial-gradient(circle_at_top,rgba(168,218,220,0.14),transparent_70%)]'
-        }`}
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent-secondary/45 to-transparent"
+        aria-hidden
       />
 
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <span className="text-accent">{String(index + 1).padStart(2, '0')}</span>
-            <span>{project.stack.slice(0, 2).join(' / ')}</span>
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border bg-background/70 px-2 font-mono text-xs font-bold text-accent">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <Layers3 className="h-3 w-3 text-accent" />
+              {primaryStack}
+            </span>
+          </div>
 
           <h3
-            className={`mt-3 font-display font-bold tracking-tight text-foreground ${
-              isFeatured ? 'text-2xl sm:text-[2rem]' : 'text-xl sm:text-2xl'
+            className={`mt-4 font-display font-bold leading-tight text-foreground ${
+              isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
             }`}
           >
             <Link
@@ -104,11 +100,7 @@ export function ProjectCard({
             </Link>
           </h3>
 
-          <p
-            className={`mt-2 max-w-2xl text-muted-foreground ${
-              isFeatured ? 'text-sm sm:text-base' : 'text-sm'
-            }`}
-          >
+          <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {project.tagline}
           </p>
         </div>
@@ -120,66 +112,75 @@ export function ProjectCard({
             rel="noopener noreferrer"
             aria-label={`Open ${project.name} on GitHub`}
             whileHover={
-              lightEffects
+              coarseEffects
                 ? { y: -1, transition: springs.hover }
                 : { y: -2, scale: 1.03, transition: springs.hover }
             }
             whileTap={{ scale: 0.96, transition: springs.tap }}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background/70 text-foreground transition-colors hover:border-accent/60 hover:text-accent"
           >
-            <GithubIcon className="h-4 w-4" />
-            GitHub
-            <ExternalLink className="h-3.5 w-3.5" />
+            <Github className="h-4 w-4" />
           </motion.a>
         ) : null}
       </div>
 
-      <ul
-        className={`relative mt-5 space-y-3 ${
-          isFeatured ? 'max-w-2xl' : ''
-        }`}
-      >
+      <div className="relative mt-5 grid gap-3">
         {visibleBullets.map((bullet) => (
-          <li key={bullet} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-            <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent" />
+          <p
+            key={bullet}
+            className="grid grid-cols-[0.75rem_1fr] gap-3 text-sm leading-relaxed text-muted-foreground"
+          >
+            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             <span>{bullet}</span>
-          </li>
+          </p>
         ))}
-      </ul>
+      </div>
 
-      <div className="relative mt-5 flex flex-wrap gap-2">
-        {visibleStack.map((tech) => (
-          <ProjectStackChip key={tech} label={tech} />
+      <div className="relative mt-6 flex flex-wrap gap-2">
+        {visibleStack.map((tech, stackIndex) => (
+          <ProjectStackChip
+            key={tech}
+            label={tech}
+            tone={stackIndex === 0 && isFeatured ? 'accent' : isCompact ? 'compact' : 'default'}
+          />
         ))}
-        {project.stack.length > visibleStack.length ? (
-          <span className="inline-flex items-center rounded-full border border-dashed border-border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            +{project.stack.length - visibleStack.length} more
+        {hiddenStackCount > 0 ? (
+          <span className="inline-flex items-center rounded-md border border-dashed border-border bg-background/40 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            +{hiddenStackCount} more
           </span>
         ) : null}
       </div>
 
-      <div className="relative mt-auto flex flex-wrap items-center gap-3 pt-6">
-        <Link
-          to={projectPath}
-          onMouseEnter={() => prefetchRoute(projectPath)}
-          onFocus={() => prefetchRoute(projectPath)}
-          className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-transform duration-300 hover:-translate-y-0.5"
-        >
-          Details
-          <ArrowUpRight className="h-4 w-4" />
-        </Link>
+      <div className="relative mt-auto pt-6">
+        <div className="mb-4 flex items-center justify-between border-t border-border pt-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span>{secondaryStack}</span>
+          <span>{project.bullets.length} highlights</span>
+        </div>
 
-        {githubUrl ? (
-          <a
-            href={githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:bg-accent/10"
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to={projectPath}
+            onMouseEnter={() => prefetchRoute(projectPath)}
+            onFocus={() => prefetchRoute(projectPath)}
+            className="inline-flex items-center gap-2 rounded-md bg-foreground px-3.5 py-2 text-sm font-semibold text-background transition-transform duration-200 hover:-translate-y-0.5"
           >
-            <GithubIcon className="h-4 w-4" />
-            Open GitHub
-          </a>
-        ) : null}
+            Details
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+
+          {githubUrl ? (
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background/60 px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:text-accent"
+            >
+              <GithubIcon className="h-4 w-4" />
+              GitHub
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          ) : null}
+        </div>
       </div>
     </motion.article>
   )
