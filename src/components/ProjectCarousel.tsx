@@ -39,6 +39,7 @@ export function ProjectCarousel({
   const [paused, setPaused] = useState(false)
   const total = projects.length
   const visibleTotal = Math.min(visibleCount, total)
+  const safeStartIdx = total > 0 ? startIdx % total : 0
 
   useEffect(() => {
     const update = () => setVisibleCount(getVisibleCount())
@@ -46,6 +47,10 @@ export function ProjectCarousel({
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
   }, [])
+
+  useEffect(() => {
+    if (total > 0 && startIdx >= total) setStartIdx(0)
+  }, [startIdx, total])
 
   useEffect(() => {
     if (paused || shouldReduceMotion || !inView || total <= visibleCount) return
@@ -59,10 +64,13 @@ export function ProjectCarousel({
   if (total === 0) return null
 
   const visible = Array.from({ length: visibleTotal }, (_, offset) => {
-    return projects[(startIdx + offset) % total]
+    return projects[(safeStartIdx + offset) % total]
   })
 
-  const activeProject = projects[startIdx]
+  const activeProject = projects[safeStartIdx]
+  const repoCount = projects.reduce((count, project) => {
+    return githubMap[project.name] ? count + 1 : count
+  }, 0)
   const slideTransition = coarseEffects
     ? { duration: durations.fast, ease: easings.cinematic }
     : { duration: durations.medium, ease: easings.cinematic }
@@ -91,10 +99,10 @@ export function ProjectCarousel({
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-md border border-border bg-card/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             <GithubIcon className="h-3.5 w-3.5 text-accent" />
-            {Object.keys(githubMap).length} repos
+            {repoCount} code links
           </span>
           <span className="rounded-md border border-border bg-card/70 px-3 py-2 font-mono text-xs font-bold text-foreground">
-            {String(startIdx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+            {String(safeStartIdx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
           </span>
         </div>
       </div>
@@ -140,7 +148,7 @@ export function ProjectCarousel({
               <ProjectCard
                 coarseEffects={coarseEffects}
                 project={project}
-                index={(startIdx + offset) % total}
+                index={(safeStartIdx + offset) % total}
                 githubUrl={githubMap[project.name]}
                 disableReveal
                 bulletLimit={2}
@@ -167,7 +175,7 @@ export function ProjectCarousel({
 
           <div className="flex flex-1 items-center gap-2" role="tablist" aria-label="Project slides">
             {projects.map((project, index) => {
-              const active = index === startIdx
+              const active = index === safeStartIdx
               return (
                 <button
                   key={project.name}

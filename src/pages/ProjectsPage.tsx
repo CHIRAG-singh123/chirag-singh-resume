@@ -83,7 +83,7 @@ export function ProjectsPage() {
 
     return [
       { label: 'Projects', value: filtered.length },
-      { label: 'Repos', value: githubCount },
+      { label: 'Code links', value: githubCount },
       { label: 'Stack', value: stackCount },
       { label: 'Signals', value: highlightCount },
     ]
@@ -299,7 +299,7 @@ export function ProjectsPage() {
             <div className="mt-12 flex flex-col gap-4 rounded-lg border border-border bg-card/80 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Source map
+                  Repository map
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Each project card keeps direct details and repository access.
