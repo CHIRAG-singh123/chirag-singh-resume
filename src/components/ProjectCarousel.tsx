@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { GithubIcon } from './BrandIcons'
 import { ProjectCard } from './ProjectCard'
@@ -18,11 +19,39 @@ const VISIBLE_TABLET = 2
 const VISIBLE_MOBILE = 1
 const COARSE_INTERVAL_MS = 4200
 
+const CAROUSEL_SECTION_STYLE: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '560px',
+}
+
+type VisibleProject = {
+  project: Project
+  projectIndex: number
+}
+
 function getVisibleCount(): number {
   if (typeof window === 'undefined') return VISIBLE_DESKTOP
   if (window.matchMedia('(min-width: 1024px)').matches) return VISIBLE_DESKTOP
   if (window.matchMedia('(min-width: 768px)').matches) return VISIBLE_TABLET
   return VISIBLE_MOBILE
+}
+
+function wrapIndex(index: number, total: number): number {
+  if (total <= 0) return 0
+  return ((index % total) + total) % total
+}
+
+function getVisibleProjects(projects: Project[], startIdx: number, count: number): VisibleProject[] {
+  const total = projects.length
+  if (total === 0) return []
+
+  const slots: VisibleProject[] = []
+  for (let offset = 0; offset < count; offset += 1) {
+    const projectIndex = wrapIndex(startIdx + offset, total)
+    const project = projects[projectIndex]
+    if (project) slots.push({ project, projectIndex })
+  }
+  return slots
 }
 
 export function ProjectCarousel({
@@ -39,7 +68,7 @@ export function ProjectCarousel({
   const [paused, setPaused] = useState(false)
   const total = projects.length
   const visibleTotal = Math.min(visibleCount, total)
-  const safeStartIdx = total > 0 ? startIdx % total : 0
+  const safeStartIdx = wrapIndex(startIdx, total)
 
   useEffect(() => {
     const update = () => setVisibleCount(getVisibleCount())
@@ -66,11 +95,7 @@ export function ProjectCarousel({
   const activeProject = projects[safeStartIdx] ?? projects[0]
   if (!activeProject) return null
 
-  const visible = Array.from({ length: visibleTotal }, (_, offset) => {
-    const projectIndex = (safeStartIdx + offset) % total
-    const project = projects[projectIndex]
-    return project ? { project, projectIndex } : null
-  }).filter((item): item is { project: Project; projectIndex: number } => item !== null)
+  const visible = getVisibleProjects(projects, safeStartIdx, visibleTotal)
 
   const repoCount = projects.reduce((count, project) => {
     return githubMap[project.name] ? count + 1 : count
@@ -83,7 +108,7 @@ export function ProjectCarousel({
     <section
       ref={rootRef}
       className="relative"
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '560px' }}
+      style={CAROUSEL_SECTION_STYLE}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}

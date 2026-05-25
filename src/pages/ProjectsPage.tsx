@@ -75,7 +75,7 @@ export function ProjectsPage() {
     () => filtered.filter((project) => !featuredNames.has(project.name)),
     [featuredNames, filtered],
   )
-  const topFeaturedProject = featured[0]
+  const [topFeaturedProject] = featured
 
   const metrics = useMemo(() => {
     const stackCount = new Set(filtered.flatMap((project) => project.stack)).size
