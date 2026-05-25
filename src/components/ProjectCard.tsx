@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowUpRight, ExternalLink, Github, Layers3 } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, Layers3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from './BrandIcons'
 import { ProjectStackChip } from './ProjectStackChip'
@@ -60,7 +60,7 @@ export function ProjectCard({
           ? { y: -2, transition: springs.hover }
           : { y: -5, transition: springs.hover }
       }
-      className={`group relative isolate flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:border-accent/55 ${
+      className={`group relative isolate flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:border-accent/55 ${
         coarseEffects ? 'hover:shadow-md' : 'hover:shadow-lg'
       } ${isFeatured ? 'p-6 sm:p-7' : isCompact ? 'p-5' : 'p-6'}`}
     >
@@ -76,7 +76,7 @@ export function ProjectCard({
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border bg-background/70 px-2 font-mono text-xs font-bold text-accent">
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background/70 font-mono text-xs font-bold text-accent">
               {String(index + 1).padStart(2, '0')}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -119,7 +119,7 @@ export function ProjectCard({
             whileTap={{ scale: 0.96, transition: springs.tap }}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background/70 text-foreground transition-colors hover:border-accent/60 hover:text-accent"
           >
-            <Github className="h-4 w-4" />
+            <GithubIcon className="h-4 w-4" />
           </motion.a>
         ) : null}
       </div>
