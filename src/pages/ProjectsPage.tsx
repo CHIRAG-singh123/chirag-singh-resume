@@ -75,6 +75,7 @@ export function ProjectsPage() {
     () => filtered.filter((project) => !featuredNames.has(project.name)),
     [featuredNames, filtered],
   )
+  const topFeaturedProject = featured[0]
 
   const metrics = useMemo(() => {
     const stackCount = new Set(filtered.flatMap((project) => project.stack)).size
@@ -318,10 +319,10 @@ export function ProjectsPage() {
               </a>
             </div>
 
-            {featured[0] ? (
+            {topFeaturedProject ? (
               <div className="mt-8 flex justify-end">
                 <Link
-                  to={`/projects/${projectSlug(featured[0].name)}`}
+                  to={`/projects/${projectSlug(topFeaturedProject.name)}`}
                   className="group inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition-transform hover:-translate-y-0.5"
                 >
                   Open top case study

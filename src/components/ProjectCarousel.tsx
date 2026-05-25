@@ -63,11 +63,15 @@ export function ProjectCarousel({
 
   if (total === 0) return null
 
-  const visible = Array.from({ length: visibleTotal }, (_, offset) => {
-    return projects[(safeStartIdx + offset) % total]
-  })
+  const activeProject = projects[safeStartIdx] ?? projects[0]
+  if (!activeProject) return null
 
-  const activeProject = projects[safeStartIdx]
+  const visible = Array.from({ length: visibleTotal }, (_, offset) => {
+    const projectIndex = (safeStartIdx + offset) % total
+    const project = projects[projectIndex]
+    return project ? { project, projectIndex } : null
+  }).filter((item): item is { project: Project; projectIndex: number } => item !== null)
+
   const repoCount = projects.reduce((count, project) => {
     return githubMap[project.name] ? count + 1 : count
   }, 0)
@@ -117,7 +121,7 @@ export function ProjectCarousel({
         }`}
       >
         <AnimatePresence mode={coarseEffects ? 'sync' : 'popLayout'} initial={false}>
-          {visible.map((project, offset) => (
+          {visible.map(({ project, projectIndex }, offset) => (
             <motion.div
               key={project.name}
               layout={!coarseEffects}
@@ -148,7 +152,7 @@ export function ProjectCarousel({
               <ProjectCard
                 coarseEffects={coarseEffects}
                 project={project}
-                index={(safeStartIdx + offset) % total}
+                index={projectIndex}
                 githubUrl={githubMap[project.name]}
                 disableReveal
                 bulletLimit={2}
