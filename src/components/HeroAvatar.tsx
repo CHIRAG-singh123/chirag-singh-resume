@@ -1,26 +1,36 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CONTACT_LINKS } from '../data/resume'
-import { durations, easings } from '../motion'
+import { getOrbitSkillIconScale } from '../lib/orbitIconScale'
+import { getSkillIcon, type SkillIconGlyph } from '../lib/skillBrandIcons'
 import { usePerfProfile } from '../lib/usePerfProfile'
-import { SkillBrandMark } from './SkillBrandMark'
+import { durations, easings } from '../motion'
+import { SkillIcon } from './SkillIcon'
 
 const buildSrcSet = (sources: { src: string; width: number }[]) =>
-  sources.map((s) => `${s.src} ${s.width}w`).join(', ')
+  sources.map((source) => `${source.src} ${source.width}w`).join(', ')
 
 const POPUP_DISMISS_MS = 2200
 const POPUP_EDGE_PADDING = 12
 const POPUP_VERTICAL_OFFSET = 10
-const ORBIT_REVEAL_DELAY_MS = 48
+const ORBIT_REVEAL_DELAY_MS = 34
 const ORBIT_REVEAL_DELAY_COARSE_MS = 96
-const PRIMARY_ORBIT_REVEAL_BATCH = 4
-const SECONDARY_ORBIT_REVEAL_BATCH = 4
 
 interface OrbitLogo {
   label: string
   popupLabel: string
   className: string
   sizeClass: string
+}
+
+interface PreparedOrbitLogo extends OrbitLogo {
+  icon: SkillIconGlyph | null
+  iconScale: number
+}
+
+interface OrbitRenderItem extends PreparedOrbitLogo {
+  orbit: 'primary' | 'secondary'
+  index: number
 }
 
 const PRIMARY_ORBIT_LOGOS: OrbitLogo[] = [
@@ -113,6 +123,19 @@ const SECONDARY_ORBIT_LOGOS: OrbitLogo[] = [
   },
 ]
 
+function decodePortrait(image: HTMLImageElement) {
+  if (typeof image.decode !== 'function') return Promise.resolve()
+  return image.decode().catch(() => undefined)
+}
+
+function prepareOrbitLogo(logo: OrbitLogo): PreparedOrbitLogo {
+  return {
+    ...logo,
+    icon: getSkillIcon(logo.label),
+    iconScale: getOrbitSkillIconScale(logo.label),
+  }
+}
+
 export function HeroAvatar() {
   const shouldReduceMotion = useReducedMotion() ?? false
   const { coarseEffects } = usePerfProfile()
@@ -124,13 +147,15 @@ export function HeroAvatar() {
   const logoRefs = useRef(new Map<string, HTMLButtonElement>())
   const dismissTimerRef = useRef<number | null>(null)
   const orbitRevealTimerRef = useRef<number | null>(null)
-  const popupLogoRef = useRef<OrbitLogo | null>(null)
-  const rafPopupRef = useRef<number>(0)
   const orbitRevealFrameRef = useRef<number>(0)
+  const popupTrackFrameRef = useRef<number>(0)
+  const popupLogoRef = useRef<OrbitLogo | null>(null)
+  const orbitPipelineStartedRef = useRef(false)
   const [popup, setPopup] = useState<OrbitLogo | null>(null)
   const [portraitReady, setPortraitReady] = useState(false)
   const [visiblePrimaryCount, setVisiblePrimaryCount] = useState(0)
   const [visibleSecondaryCount, setVisibleSecondaryCount] = useState(0)
+  const [orbitSpinReady, setOrbitSpinReady] = useState(false)
   const motionReduced = shouldReduceMotion
   const primaryCounterSpinClass = motionReduced
     ? ''
@@ -138,11 +163,28 @@ export function HeroAvatar() {
   const secondaryCounterSpinClass = motionReduced
     ? ''
     : 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite]'
-  const orbitSpinEnabled = !motionReduced
+  const orbitSpinEnabled = !motionReduced && orbitSpinReady
+  const orbitRevealDelay = coarseEffects ? ORBIT_REVEAL_DELAY_COARSE_MS : ORBIT_REVEAL_DELAY_MS
+  const primaryOrbitLogos = useMemo(
+    () => PRIMARY_ORBIT_LOGOS.map(prepareOrbitLogo),
+    [],
+  )
+  const secondaryOrbitLogos = useMemo(
+    () => SECONDARY_ORBIT_LOGOS.map(prepareOrbitLogo),
+    [],
+  )
 
-  useEffect(() => {
-    if (portraitRef.current?.complete) setPortraitReady(true)
-  }, [])
+  const orbitSequence = useMemo<OrbitRenderItem[]>(
+    () => [
+      ...primaryOrbitLogos.map((logo, index) => ({ ...logo, orbit: 'primary' as const, index })),
+      ...secondaryOrbitLogos.map((logo, index) => ({
+        ...logo,
+        orbit: 'secondary' as const,
+        index,
+      })),
+    ],
+    [primaryOrbitLogos, secondaryOrbitLogos],
+  )
 
   const syncPopupAnchor = useCallback((logo: OrbitLogo) => {
     const root = rootRef.current
@@ -173,78 +215,77 @@ export function HeroAvatar() {
   }, [])
 
   useEffect(() => {
-    if (!popup) return
+    const image = portraitRef.current
+    if (!image) return undefined
 
-    const handleResize = () => {
-      const openLogo = popupLogoRef.current
-      if (openLogo) syncPopupAnchor(openLogo)
+    let cancelled = false
+
+    const markReady = () => {
+      if (!cancelled) setPortraitReady(true)
     }
 
-    handleResize()
-    window.addEventListener('resize', handleResize)
-
-    if (!orbitSpinEnabled) {
-      return () => window.removeEventListener('resize', handleResize)
+    const handleReady = () => {
+      void decodePortrait(image).finally(markReady)
     }
 
-    const tick = () => {
-      const openLogo = popupLogoRef.current
-      if (!openLogo) return
-      syncPopupAnchor(openLogo)
-      rafPopupRef.current = requestAnimationFrame(tick)
+    if (image.complete) {
+      handleReady()
+    } else {
+      image.addEventListener('load', handleReady)
+      image.addEventListener('error', markReady)
     }
 
-    rafPopupRef.current = requestAnimationFrame(tick)
     return () => {
-      window.removeEventListener('resize', handleResize)
-      if (rafPopupRef.current) cancelAnimationFrame(rafPopupRef.current)
-      rafPopupRef.current = 0
+      cancelled = true
+      image.removeEventListener('load', handleReady)
+      image.removeEventListener('error', markReady)
     }
-  }, [orbitSpinEnabled, popup, syncPopupAnchor])
+  }, [])
 
   useEffect(
     () => () => {
       if (dismissTimerRef.current !== null) window.clearTimeout(dismissTimerRef.current)
       if (orbitRevealTimerRef.current !== null) window.clearTimeout(orbitRevealTimerRef.current)
-      if (rafPopupRef.current) cancelAnimationFrame(rafPopupRef.current)
       if (orbitRevealFrameRef.current) cancelAnimationFrame(orbitRevealFrameRef.current)
+      if (popupTrackFrameRef.current) cancelAnimationFrame(popupTrackFrameRef.current)
     },
     [],
   )
 
   useEffect(() => {
-    if (!portraitReady) {
-      setVisiblePrimaryCount(0)
-      setVisibleSecondaryCount(0)
-      return
-    }
+    if (!portraitReady || orbitPipelineStartedRef.current) return
 
-    const stepDelay = coarseEffects ? ORBIT_REVEAL_DELAY_COARSE_MS : ORBIT_REVEAL_DELAY_MS
-    const revealSteps = [
-      () => setVisiblePrimaryCount(Math.min(PRIMARY_ORBIT_REVEAL_BATCH, PRIMARY_ORBIT_LOGOS.length)),
-      () => setVisiblePrimaryCount(PRIMARY_ORBIT_LOGOS.length),
-      () =>
-        setVisibleSecondaryCount(
-          Math.min(SECONDARY_ORBIT_REVEAL_BATCH, SECONDARY_ORBIT_LOGOS.length),
-        ),
-      () => setVisibleSecondaryCount(SECONDARY_ORBIT_LOGOS.length),
-    ]
+    orbitPipelineStartedRef.current = true
 
-    setVisiblePrimaryCount(0)
-    setVisibleSecondaryCount(0)
+    const revealNext = (sequenceIndex: number) => {
+      const item = orbitSequence[sequenceIndex]
+      if (!item) {
+        orbitRevealFrameRef.current = requestAnimationFrame(() => {
+          setOrbitSpinReady(true)
+        })
+        return
+      }
 
-    const runRevealStep = (index: number) => {
-      revealSteps[index]()
-      if (index >= revealSteps.length - 1) return
+      if (item.orbit === 'primary') {
+        setVisiblePrimaryCount((current) => Math.max(current, item.index + 1))
+      } else {
+        setVisibleSecondaryCount((current) => Math.max(current, item.index + 1))
+      }
+
+      const nextIndex = sequenceIndex + 1
+      if (nextIndex >= orbitSequence.length) {
+        orbitRevealFrameRef.current = requestAnimationFrame(() => {
+          setOrbitSpinReady(true)
+        })
+        return
+      }
 
       orbitRevealTimerRef.current = window.setTimeout(() => {
-        orbitRevealFrameRef.current = requestAnimationFrame(() => runRevealStep(index + 1))
-      }, stepDelay)
+        orbitRevealFrameRef.current = requestAnimationFrame(() => revealNext(nextIndex))
+      }, orbitRevealDelay)
     }
 
-    orbitRevealFrameRef.current = requestAnimationFrame(() => {
-      orbitRevealFrameRef.current = requestAnimationFrame(() => runRevealStep(0))
-    })
+    orbitRevealFrameRef.current = requestAnimationFrame(() => revealNext(0))
 
     return () => {
       if (orbitRevealTimerRef.current !== null) {
@@ -256,7 +297,38 @@ export function HeroAvatar() {
         orbitRevealFrameRef.current = 0
       }
     }
-  }, [coarseEffects, portraitReady])
+  }, [orbitRevealDelay, orbitSequence, portraitReady])
+
+  useEffect(() => {
+    if (!popup) return
+
+    const handleResize = () => {
+      const openLogo = popupLogoRef.current
+      if (openLogo) syncPopupAnchor(openLogo)
+    }
+
+    const track = () => {
+      const openLogo = popupLogoRef.current
+      if (!openLogo) return
+      syncPopupAnchor(openLogo)
+      if (orbitSpinEnabled) {
+        popupTrackFrameRef.current = requestAnimationFrame(track)
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    if (orbitSpinEnabled) {
+      popupTrackFrameRef.current = requestAnimationFrame(track)
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (popupTrackFrameRef.current) cancelAnimationFrame(popupTrackFrameRef.current)
+      popupTrackFrameRef.current = 0
+    }
+  }, [orbitSpinEnabled, popup, syncPopupAnchor])
 
   function showPopup(logo: OrbitLogo) {
     if (dismissTimerRef.current !== null) {
@@ -289,9 +361,7 @@ export function HeroAvatar() {
     >
       <div
         className={`absolute inset-[-12%] rounded-full bg-hero-gradient bg-[length:300%_300%] ${
-          coarseEffects
-            ? 'opacity-18 blur-xl'
-            : 'opacity-40 blur-3xl animate-gradient-shift'
+          coarseEffects ? 'opacity-[0.16]' : 'opacity-40 blur-3xl animate-gradient-shift'
         }`}
         aria-hidden="true"
       />
@@ -302,7 +372,7 @@ export function HeroAvatar() {
             orbitSpinEnabled ? 'motion-reduce:animate-none animate-[spin_28s_linear_infinite]' : ''
           }`}
         >
-          {PRIMARY_ORBIT_LOGOS.slice(0, visiblePrimaryCount).map((logo) => (
+          {primaryOrbitLogos.slice(0, visiblePrimaryCount).map((logo) => (
             <button
               key={logo.label}
               ref={(element) => {
@@ -318,9 +388,11 @@ export function HeroAvatar() {
               className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
             >
               <span className={primaryCounterSpinClass}>
-                <SkillBrandMark
-                  label={logo.label}
-                  className={`${logo.sizeClass} shrink-0`}
+                <SkillIcon
+                  glyph={logo.icon}
+                  tone="badge"
+                  className={`${logo.sizeClass} max-h-full max-w-full shrink-0`}
+                  style={{ transform: `scale(${logo.iconScale})` }}
                 />
               </span>
             </button>
@@ -336,7 +408,7 @@ export function HeroAvatar() {
               : ''
           }`}
         >
-          {SECONDARY_ORBIT_LOGOS.slice(0, visibleSecondaryCount).map((logo) => (
+          {secondaryOrbitLogos.slice(0, visibleSecondaryCount).map((logo) => (
             <button
               key={logo.label}
               ref={(element) => {
@@ -352,9 +424,11 @@ export function HeroAvatar() {
               className={`pointer-events-auto absolute z-[2] flex items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${logo.className} ${logo.sizeClass}`}
             >
               <span className={secondaryCounterSpinClass}>
-                <SkillBrandMark
-                  label={logo.label}
-                  className={`${logo.sizeClass} shrink-0`}
+                <SkillIcon
+                  glyph={logo.icon}
+                  tone="badge"
+                  className={`${logo.sizeClass} max-h-full max-w-full shrink-0`}
+                  style={{ transform: `scale(${logo.iconScale})` }}
                 />
               </span>
             </button>
@@ -383,8 +457,6 @@ export function HeroAvatar() {
             fetchPriority="high"
             loading="eager"
             decoding="async"
-            onLoad={() => setPortraitReady(true)}
-            onError={() => setPortraitReady(true)}
             className="h-full w-full object-cover"
           />
         </picture>

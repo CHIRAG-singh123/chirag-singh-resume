@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ProjectCard } from './ProjectCard'
 import { usePerfProfile } from '../lib/usePerfProfile'
 import type { Project } from '../lib/resume/types'
@@ -36,8 +36,6 @@ export function ProjectCarousel({
   const [startIdx, setStartIdx] = useState(0)
   const [visibleCount, setVisibleCount] = useState<number>(VISIBLE_DESKTOP)
   const [paused, setPaused] = useState(false)
-  const expandedSet = useRef<Set<string>>(new Set())
-  const [hasExpanded, setHasExpanded] = useState(false)
 
   const total = projects.length
 
@@ -49,22 +47,13 @@ export function ProjectCarousel({
   }, [])
 
   useEffect(() => {
-    if (paused || hasExpanded || shouldReduceMotion || !inView || total <= visibleCount) return
+    if (paused || shouldReduceMotion || !inView || total <= visibleCount) return
     const effectiveIntervalMs = coarseEffects ? Math.max(intervalMs, COARSE_INTERVAL_MS) : intervalMs
     const id = window.setInterval(() => {
       setStartIdx((s) => (s + 1) % total)
     }, effectiveIntervalMs)
     return () => window.clearInterval(id)
-  }, [paused, hasExpanded, shouldReduceMotion, inView, total, visibleCount, intervalMs, coarseEffects])
-
-  const handleExpandChange = useCallback((projectName: string, expanded: boolean) => {
-    if (expanded) {
-      expandedSet.current.add(projectName)
-    } else {
-      expandedSet.current.delete(projectName)
-    }
-    setHasExpanded(expandedSet.current.size > 0)
-  }, [])
+  }, [paused, shouldReduceMotion, inView, total, visibleCount, intervalMs, coarseEffects])
 
   const visible = Array.from({ length: Math.min(visibleCount, total) }, (_, i) => {
     return projects[(startIdx + i) % total]
@@ -135,7 +124,6 @@ export function ProjectCarousel({
                 index={0}
                 githubUrl={githubMap[project.name]}
                 disableReveal
-                onExpandChange={(exp) => handleExpandChange(project.name, exp)}
               />
             </motion.div>
           ))}
