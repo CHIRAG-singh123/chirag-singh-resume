@@ -9,7 +9,6 @@ import type { Project } from '../lib/resume/types'
 import {
   cinematicTransition,
   durations,
-  easings,
   sectionVariants,
   springs,
   viewport,
