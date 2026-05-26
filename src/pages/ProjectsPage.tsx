@@ -114,7 +114,7 @@ export function ProjectsPage() {
               </span>
 
               <h1 className="mt-5 max-w-4xl font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
-                Case studies built from AI systems, product engineering, and full-stack delivery.
+                Building AI-powered full-stack products with scalable web and machine learning systems.
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
