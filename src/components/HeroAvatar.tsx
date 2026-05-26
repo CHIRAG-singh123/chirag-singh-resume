@@ -15,6 +15,7 @@ const POPUP_EDGE_PADDING = 12
 const POPUP_VERTICAL_OFFSET = 10
 const ORBIT_REVEAL_DELAY_MS = 34
 const ORBIT_REVEAL_DELAY_COARSE_MS = 96
+const ORBIT_REVEAL_BATCH_SIZE = 2
 
 interface OrbitLogo {
   label: string
@@ -138,7 +139,7 @@ function prepareOrbitLogo(logo: OrbitLogo): PreparedOrbitLogo {
 
 export function HeroAvatar() {
   const shouldReduceMotion = useReducedMotion() ?? false
-  const { coarseEffects } = usePerfProfile()
+  const { coarseEffects, hardwareCoarse } = usePerfProfile()
   const portrait = CONTACT_LINKS.profileImage
   const rootRef = useRef<HTMLDivElement>(null)
   const portraitRef = useRef<HTMLImageElement>(null)
@@ -165,6 +166,11 @@ export function HeroAvatar() {
     : 'motion-reduce:animate-none animate-[spin_33.6s_linear_infinite]'
   const orbitSpinEnabled = !motionReduced && orbitSpinReady
   const orbitRevealDelay = coarseEffects ? ORBIT_REVEAL_DELAY_COARSE_MS : ORBIT_REVEAL_DELAY_MS
+  const haloClass = hardwareCoarse
+    ? 'hidden'
+    : motionReduced
+      ? 'opacity-[0.18] blur-2xl'
+      : 'opacity-40 blur-3xl animate-gradient-shift'
   const primaryOrbitLogos = useMemo(
     () => PRIMARY_ORBIT_LOGOS.map(prepareOrbitLogo),
     [],
@@ -258,21 +264,23 @@ export function HeroAvatar() {
     orbitPipelineStartedRef.current = true
 
     const revealNext = (sequenceIndex: number) => {
-      const item = orbitSequence[sequenceIndex]
-      if (!item) {
+      const batch = orbitSequence.slice(sequenceIndex, sequenceIndex + ORBIT_REVEAL_BATCH_SIZE)
+      if (batch.length === 0) {
         orbitRevealFrameRef.current = requestAnimationFrame(() => {
           setOrbitSpinReady(true)
         })
         return
       }
 
-      if (item.orbit === 'primary') {
-        setVisiblePrimaryCount((current) => Math.max(current, item.index + 1))
-      } else {
-        setVisibleSecondaryCount((current) => Math.max(current, item.index + 1))
+      for (const item of batch) {
+        if (item.orbit === 'primary') {
+          setVisiblePrimaryCount((current) => Math.max(current, item.index + 1))
+        } else {
+          setVisibleSecondaryCount((current) => Math.max(current, item.index + 1))
+        }
       }
 
-      const nextIndex = sequenceIndex + 1
+      const nextIndex = sequenceIndex + ORBIT_REVEAL_BATCH_SIZE
       if (nextIndex >= orbitSequence.length) {
         orbitRevealFrameRef.current = requestAnimationFrame(() => {
           setOrbitSpinReady(true)
@@ -360,9 +368,7 @@ export function HeroAvatar() {
       className="relative mx-auto aspect-square w-64 overflow-visible sm:w-80 md:w-[22rem]"
     >
       <div
-        className={`absolute inset-[-12%] rounded-full bg-hero-gradient bg-[length:300%_300%] ${
-          coarseEffects ? 'opacity-[0.16]' : 'opacity-40 blur-3xl animate-gradient-shift'
-        }`}
+        className={`absolute inset-[-12%] rounded-full bg-hero-gradient bg-[length:300%_300%] ${haloClass}`}
         aria-hidden="true"
       />
 
