@@ -2,7 +2,6 @@ import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { ArrowRight, ExternalLink, Filter, Grid3X3, Layers3, Sparkles } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatedSection } from '../components/AnimatedSection'
 import { GithubIcon } from '../components/BrandIcons'
 import { PageTransition } from '../components/PageTransition'
 import { ProjectCard } from '../components/ProjectCard'
@@ -189,7 +188,7 @@ export function ProjectsPage() {
         </div>
       </section>
 
-      <AnimatedSection className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         {filtered.length === 0 ? (
           <AnimatePresence mode="wait">
             <motion.div
@@ -332,7 +331,7 @@ export function ProjectsPage() {
             ) : null}
           </>
         )}
-      </AnimatedSection>
+      </section>
     </PageTransition>
   )
 }
