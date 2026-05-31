@@ -13,7 +13,7 @@ import { durations, easings, springs } from '../motion'
 const FILTER_TAGS_PER_PROJECT = 2
 const FEATURED_PROJECT_NAMES = ['IGAN-Face-Generation', 'Sentiment Analysis', 'Zentro'] as const
 const FEATURED_PROJECT_NAME_SET = new Set<string>(FEATURED_PROJECT_NAMES)
-const FEATURED_PROJECT_ORDER = new Map(
+const FEATURED_PROJECT_ORDER = new Map<string, number>(
   FEATURED_PROJECT_NAMES.map((name, index) => [name, index] as const),
 )
 
