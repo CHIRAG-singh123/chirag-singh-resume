@@ -16,6 +16,12 @@ import {
 
 const DEFAULT_BULLET_LIMIT = 2
 const DEFAULT_STACK_LIMIT = 4
+const SUMMARY_CLAMP_STYLE = {
+  display: '-webkit-box',
+  overflow: 'hidden',
+  WebkitBoxOrient: 'vertical' as const,
+  WebkitLineClamp: 2,
+}
 
 interface ProjectCardProps {
   coarseEffects: boolean
@@ -25,6 +31,7 @@ interface ProjectCardProps {
   disableReveal?: boolean
   bulletLimit?: number
   stackLimit?: number
+  descriptionMode?: 'bullets' | 'summary'
   variant?: 'default' | 'featured' | 'compact'
 }
 
@@ -36,12 +43,14 @@ export function ProjectCard({
   disableReveal = false,
   bulletLimit = DEFAULT_BULLET_LIMIT,
   stackLimit = DEFAULT_STACK_LIMIT,
+  descriptionMode = 'bullets',
   variant = 'default',
 }: ProjectCardProps) {
   const projectPath = `/projects/${projectSlug(project.name)}`
   const visibleBullets = project.bullets.slice(0, bulletLimit)
   const visibleStack = project.stack.slice(0, stackLimit)
   const hiddenStackCount = project.stack.length - visibleStack.length
+  const summaryText = visibleBullets.join(' ')
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const primaryStack = project.stack[0] ?? 'Project'
@@ -123,17 +132,33 @@ export function ProjectCard({
         ) : null}
       </div>
 
-      <div className="relative mt-5 grid gap-3">
-        {visibleBullets.map((bullet) => (
-          <p
-            key={bullet}
-            className="grid grid-cols-[0.75rem_1fr] gap-3 text-sm leading-relaxed text-muted-foreground"
-          >
-            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            <span>{bullet}</span>
+      {descriptionMode === 'summary' ? (
+        <div className="relative mt-5">
+          <p className="text-sm leading-relaxed text-muted-foreground" style={SUMMARY_CLAMP_STYLE}>
+            {summaryText}
           </p>
-        ))}
-      </div>
+          <Link
+            to={projectPath}
+            onMouseEnter={() => prefetchRoute(projectPath)}
+            onFocus={() => prefetchRoute(projectPath)}
+            className="mt-2 inline-flex text-xs font-semibold text-accent transition-colors hover:text-accent-secondary"
+          >
+            Read more
+          </Link>
+        </div>
+      ) : (
+        <div className="relative mt-5 grid gap-3">
+          {visibleBullets.map((bullet) => (
+            <p
+              key={bullet}
+              className="grid grid-cols-[0.75rem_1fr] gap-3 text-sm leading-relaxed text-muted-foreground"
+            >
+              <span className="mt-2 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+              <span>{bullet}</span>
+            </p>
+          ))}
+        </div>
+      )}
 
       <div className="relative mt-6 flex flex-wrap gap-2">
         {visibleStack.map((tech, stackIndex) => (

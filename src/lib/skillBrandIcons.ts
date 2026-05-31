@@ -50,6 +50,7 @@ const DEVICON_BY_KEY: Record<string, SkillIconGlyph> = {
   mern: svg('mongodb'),
   angular: svg('angular', '#dd0031'),
   laravel: svg('laravel'),
+  inertiajs: svg('inertiajs'),
   tensorflow: svg('tensorflow'),
   keras: svg('keras'),
   'scikit-learn': svg('scikitlearn'),
@@ -84,6 +85,7 @@ export function normalizeSkillKey(raw: string): string {
   let s = raw.trim().toLowerCase()
   s = s.replace(/\s*\([^)]*\)\s*$/, '').trim()
   if (/^mern\b/.test(s)) return 'mern'
+  if (s === 'inertia.js' || s === 'inertiajs') return 'inertiajs'
   if (s === 'node.js' || s === 'nodejs') return 'nodejs'
   if (s === 'express.js' || s === 'express') return 'express'
   if (s === 'scikit learn') return 'scikit-learn'

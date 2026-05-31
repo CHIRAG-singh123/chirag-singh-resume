@@ -172,7 +172,7 @@ export function ProjectCarousel({
                     : { opacity: 0, x: -64, scale: 0.98 }
               }
               transition={shouldReduceMotion ? { duration: 0.18 } : slideTransition}
-              className="flex h-full min-h-[25rem]"
+              className="flex h-full min-h-[22rem]"
             >
               <ProjectCard
                 coarseEffects={coarseEffects}
@@ -182,6 +182,7 @@ export function ProjectCarousel({
                 disableReveal
                 bulletLimit={2}
                 stackLimit={4}
+                descriptionMode="summary"
                 variant={offset === 0 ? 'featured' : 'compact'}
               />
             </motion.div>

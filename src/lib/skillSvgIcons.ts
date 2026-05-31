@@ -8,6 +8,7 @@ import flutterSvg from 'devicon/icons/flutter/flutter-plain.svg?raw'
 import gitSvg from 'devicon/icons/git/git-plain.svg?raw'
 import googleSvg from 'devicon/icons/google/google-original.svg?raw'
 import googleCloudSvg from 'devicon/icons/googlecloud/googlecloud-original.svg?raw'
+import inertiajsSvg from 'devicon/icons/inertiajs/inertiajs-original.svg?raw'
 import javaSvg from 'devicon/icons/java/java-plain.svg?raw'
 import javascriptSvg from 'devicon/icons/javascript/javascript-plain.svg?raw'
 import jupyterSvg from 'devicon/icons/jupyter/jupyter-original.svg?raw'
@@ -68,6 +69,7 @@ const SKILL_SVG_ICONS = {
   git: toInlineSvg(gitSvg),
   google: toInlineSvg(googleSvg),
   googleCloud: toInlineSvg(googleCloudSvg),
+  inertiajs: toInlineSvg(inertiajsSvg),
   java: toInlineSvg(javaSvg),
   javascript: toInlineSvg(javascriptSvg),
   jupyter: toInlineSvg(jupyterSvg),

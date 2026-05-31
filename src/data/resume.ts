@@ -33,6 +33,7 @@ export const resume: ResumeData = {
         'Angular',
         'Flutter',
         'Laravel',
+        'Inertia.js',
         'TensorFlow',
         'Keras',
         'Scikit-learn',
@@ -95,6 +96,17 @@ export const resume: ResumeData = {
         'Automated user data handling for efficient, scalable management.',
       ],
       stack: ['Full-Stack', 'Real-time Chat', 'CRM', 'ERP', 'Chatbot', 'Analytics'],
+    },
+    {
+      name: 'Default Panel CMS',
+      tagline: 'CMS-Driven Business Website + Admin Panel',
+      bullets: [
+        'Built a full-stack Laravel + React/Inertia CMS that powers a public business website and a secured admin panel from the same codebase.',
+        'Implemented fixed-page content management, reusable products/services, galleries, testimonials, team members, and inquiry workflows without hardcoded public copy.',
+        'Added role-based admin access, Google login, password reset, and two-factor authentication for production-style panel security.',
+        'Used SQL-backed relational data, media handling, theme switching, SEO fields, and maintenance mode to keep public content configurable and deployment-ready.',
+      ],
+      stack: ['Laravel', 'Inertia.js', 'React', 'TypeScript', 'SQL', 'Tailwind CSS', 'RBAC', 'Google OAuth'],
     },
     {
       name: 'LJ Learning Platform',
@@ -189,6 +201,7 @@ export const resume: ResumeData = {
  */
 export const PROJECT_LINKS: Record<string, string> = {
   Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
+  'Default Panel CMS': 'https://github.com/CHIRAG-singh123/CMS-System',
   'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
   'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
   'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',

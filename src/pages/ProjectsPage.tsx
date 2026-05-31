@@ -11,7 +11,11 @@ import { usePerfProfile } from '../lib/usePerfProfile'
 import { durations, easings, springs } from '../motion'
 
 const FILTER_TAGS_PER_PROJECT = 2
-const FEATURED_PROJECT_COUNT = 3
+const FEATURED_PROJECT_NAMES = ['IGAN-Face-Generation', 'Sentiment Analysis', 'Zentro'] as const
+const FEATURED_PROJECT_NAME_SET = new Set<string>(FEATURED_PROJECT_NAMES)
+const FEATURED_PROJECT_ORDER = new Map(
+  FEATURED_PROJECT_NAMES.map((name, index) => [name, index] as const),
+)
 
 const tagRowVariants: Variants = {
   hidden: {},
@@ -30,11 +34,6 @@ const tagItemVariants: Variants = {
     y: 0,
     transition: { duration: durations.fast, ease: easings.cinematic },
   },
-}
-
-function getProjectScore(project: (typeof resume.projects)[number]) {
-  const githubBonus = PROJECT_LINKS[project.name] ? 2 : 0
-  return project.bullets.length * 3 + project.stack.length + githubBonus
 }
 
 export function ProjectsPage() {
@@ -63,9 +62,13 @@ export function ProjectsPage() {
 
   const featured = useMemo(
     () =>
-      [...filtered]
-        .sort((left, right) => getProjectScore(right) - getProjectScore(left))
-        .slice(0, FEATURED_PROJECT_COUNT),
+      filtered
+        .filter((project) => FEATURED_PROJECT_NAME_SET.has(project.name))
+        .sort(
+          (left, right) =>
+            (FEATURED_PROJECT_ORDER.get(left.name) ?? Number.MAX_SAFE_INTEGER) -
+            (FEATURED_PROJECT_ORDER.get(right.name) ?? Number.MAX_SAFE_INTEGER),
+        ),
     [filtered],
   )
 
@@ -75,6 +78,7 @@ export function ProjectsPage() {
     [featuredNames, filtered],
   )
   const [topFeaturedProject] = featured
+  const hasFeatured = featured.length > 0
 
   const metrics = useMemo(() => {
     const stackCount = new Set(filtered.flatMap((project) => project.stack)).size
@@ -205,50 +209,56 @@ export function ProjectsPage() {
           </AnimatePresence>
         ) : (
           <>
-            <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Featured case studies
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-bold text-foreground sm:text-3xl">
-                  High-signal work, ready to inspect
-                </h2>
-              </div>
+            {hasFeatured ? (
+              <>
+                <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Featured case studies
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-bold text-foreground sm:text-3xl">
+                      High-signal work, ready to inspect
+                    </h2>
+                  </div>
 
-              <div className="inline-flex items-center gap-2 self-start rounded-md border border-border bg-card/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:self-auto">
-                <Layers3 className="h-3.5 w-3.5 text-accent" />
-                {featured.length} selected
-              </div>
-            </div>
+                  <div className="inline-flex items-center gap-2 self-start rounded-md border border-border bg-card/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:self-auto">
+                    <Layers3 className="h-3.5 w-3.5 text-accent" />
+                    {featured.length} selected
+                  </div>
+                </div>
 
-            <div className="mt-7 grid gap-5 xl:grid-cols-12">
-              {featured.map((project, index) => (
-                <motion.div
-                  key={project.name}
-                  initial={coarseEffects ? { opacity: 0, y: 12 } : { opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: durations.base,
-                    ease: easings.emphasized,
-                    delay: Math.min(index, 2) * 0.04,
-                  }}
-                  className={index === 0 ? 'xl:col-span-7' : 'xl:col-span-5'}
-                >
-                  <ProjectCard
-                    coarseEffects={coarseEffects}
-                    project={project}
-                    index={index}
-                    githubUrl={PROJECT_LINKS[project.name]}
-                    disableReveal
-                    bulletLimit={index === 0 ? 2 : 1}
-                    stackLimit={index === 0 ? 5 : 4}
-                    variant="featured"
-                  />
-                </motion.div>
-              ))}
-            </div>
+                <div className="mt-7 grid gap-5 xl:grid-cols-12">
+                  {featured.map((project, index) => (
+                    <motion.div
+                      key={project.name}
+                      initial={coarseEffects ? { opacity: 0, y: 12 } : { opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: durations.base,
+                        ease: easings.emphasized,
+                        delay: Math.min(index, 2) * 0.04,
+                      }}
+                      className={index === 0 ? 'xl:col-span-7' : 'xl:col-span-5'}
+                    >
+                      <ProjectCard
+                        coarseEffects={coarseEffects}
+                        project={project}
+                        index={index}
+                        githubUrl={PROJECT_LINKS[project.name]}
+                        disableReveal
+                        bulletLimit={index === 0 ? 2 : 1}
+                        stackLimit={index === 0 ? 5 : 4}
+                        variant="featured"
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            ) : null}
 
-            <div className="mt-14 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <div
+              className={`${hasFeatured ? 'mt-14' : ''} flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between`}
+            >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Project ledger
