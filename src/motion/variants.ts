@@ -5,13 +5,11 @@ export const pageVariants: Variants = {
   hidden: {
     opacity: 0,
     y: distances.md,
-    filter: 'blur(10px)',
     scale: 0.985,
   },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     scale: 1,
     transition: {
       duration: durations.cinematic,
@@ -23,7 +21,6 @@ export const pageVariants: Variants = {
   exit: {
     opacity: 0,
     y: -distances.sm,
-    filter: 'blur(6px)',
     scale: 0.99,
     transition: {
       duration: durations.fast,
@@ -36,12 +33,10 @@ export const sectionVariants: Variants = {
   hidden: {
     opacity: 0,
     y: distances.md,
-    filter: 'blur(8px)',
   },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: emphasizedTransition(durations.medium),
   },
 }
@@ -59,13 +54,11 @@ export const sectionVariantsCinematic: Variants = {
   hidden: {
     opacity: 0,
     y: distances.lg,
-    filter: 'blur(12px)',
     scale: 0.98,
   },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     scale: 1,
     transition: {
       duration: durations.slow,
@@ -75,21 +68,19 @@ export const sectionVariantsCinematic: Variants = {
 }
 
 export const fadeBlurUp: Variants = {
-  hidden: { opacity: 0, y: distances.sm, filter: 'blur(6px)' },
+  hidden: { opacity: 0, y: distances.sm },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: cinematicTransition(durations.base),
   },
 }
 
 export const fadeBlurDown: Variants = {
-  hidden: { opacity: 0, y: -distances.sm, filter: 'blur(6px)' },
+  hidden: { opacity: 0, y: -distances.sm },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: cinematicTransition(durations.base),
   },
 }
@@ -142,11 +133,10 @@ export const listStaggerFast: Variants = {
 }
 
 export const itemVariants: Variants = {
-  hidden: { opacity: 0, y: distances.sm, filter: 'blur(4px)' },
+  hidden: { opacity: 0, y: distances.sm },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: cinematicTransition(durations.base),
   },
 }
@@ -162,11 +152,10 @@ export const itemVariantsScale: Variants = {
 }
 
 export const headingVariants: Variants = {
-  hidden: { opacity: 0, y: distances.sm, filter: 'blur(8px)' },
+  hidden: { opacity: 0, y: distances.sm },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: emphasizedTransition(durations.medium),
   },
 }

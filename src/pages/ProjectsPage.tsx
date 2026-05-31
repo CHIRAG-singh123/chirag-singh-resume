@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { ArrowRight, ExternalLink, Filter, Grid3X3, Layers3, Sparkles } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from '../components/BrandIcons'
 import { PageTransition } from '../components/PageTransition'
@@ -16,6 +16,11 @@ const FEATURED_PROJECT_NAME_SET = new Set<string>(FEATURED_PROJECT_NAMES)
 const FEATURED_PROJECT_ORDER = new Map(
   FEATURED_PROJECT_NAMES.map((name, index) => [name, index] as const),
 )
+
+const PROJECT_LEDGER_SECTION_STYLE = {
+  containIntrinsicSize: '1400px',
+  contentVisibility: 'auto',
+} as CSSProperties
 
 const tagRowVariants: Variants = {
   hidden: {},
@@ -170,11 +175,7 @@ export function ProjectsPage() {
                     type="button"
                     variants={coarseEffects ? undefined : tagItemVariants}
                     onClick={() => setActiveTag(tag)}
-                    whileHover={
-                      coarseEffects
-                        ? { y: -1, transition: springs.hover }
-                        : { y: -2, transition: springs.hover }
-                    }
+                    whileHover={coarseEffects ? undefined : { y: -2, transition: springs.hover }}
                     whileTap={{ scale: 0.97, transition: springs.tap }}
                     aria-pressed={active}
                     className={`inline-flex items-center justify-center rounded-md border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-[transform,color,border-color,background-color] duration-200 ${
@@ -231,13 +232,17 @@ export function ProjectsPage() {
                   {featured.map((project, index) => (
                     <motion.div
                       key={project.name}
-                      initial={coarseEffects ? { opacity: 0, y: 12 } : { opacity: 0, y: 18 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: durations.base,
-                        ease: easings.emphasized,
-                        delay: Math.min(index, 2) * 0.04,
-                      }}
+                      initial={coarseEffects ? false : { opacity: 0, y: 18 }}
+                      animate={coarseEffects ? undefined : { opacity: 1, y: 0 }}
+                      transition={
+                        coarseEffects
+                          ? undefined
+                          : {
+                              duration: durations.base,
+                              ease: easings.emphasized,
+                              delay: Math.min(index, 2) * 0.04,
+                            }
+                      }
                       className={index === 0 ? 'xl:col-span-7' : 'xl:col-span-5'}
                     >
                       <ProjectCard
@@ -256,89 +261,95 @@ export function ProjectsPage() {
               </>
             ) : null}
 
-            <div
-              className={`${hasFeatured ? 'mt-14' : ''} flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between`}
-            >
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Project ledger
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-bold text-foreground sm:text-3xl">
-                  Compact scan across the portfolio
-                </h2>
-              </div>
-
-              <div className="inline-flex items-center gap-2 self-start rounded-md border border-border bg-card/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:self-auto">
-                <Grid3X3 className="h-3.5 w-3.5 text-accent" />
-                {showcase.length} more
-              </div>
-            </div>
-
-            {showcase.length > 0 ? (
-              <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {showcase.map((project, index) => (
-                  <motion.div
-                    key={project.name}
-                    initial={coarseEffects ? { opacity: 0, y: 10 } : { opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: durations.base,
-                      ease: easings.emphasized,
-                      delay: Math.min(index, 5) * 0.035,
-                    }}
-                  >
-                    <ProjectCard
-                      coarseEffects={coarseEffects}
-                      project={project}
-                      index={featured.length + index}
-                      githubUrl={PROJECT_LINKS[project.name]}
-                      disableReveal
-                      bulletLimit={2}
-                      stackLimit={4}
-                      variant="compact"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-7 rounded-lg border border-border bg-card/70 p-8 text-sm text-muted-foreground">
-                The active filter is concentrated in the featured set above.
-              </div>
-            )}
-
-            <div className="mt-12 flex flex-col gap-4 rounded-lg border border-border bg-card/80 p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Repository map
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Each project card keeps direct details and repository access.
-                </p>
-              </div>
-
-              <a
-                href={resume.personal.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-background/70 px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:text-accent"
+            <div style={PROJECT_LEDGER_SECTION_STYLE}>
+              <div
+                className={`${hasFeatured ? 'mt-14' : ''} flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between`}
               >
-                <GithubIcon className="h-4 w-4" />
-                GitHub profile
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Project ledger
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-bold text-foreground sm:text-3xl">
+                    Compact scan across the portfolio
+                  </h2>
+                </div>
 
-            {topFeaturedProject ? (
-              <div className="mt-8 flex justify-end">
-                <Link
-                  to={`/projects/${projectSlug(topFeaturedProject.name)}`}
-                  className="group inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition-transform hover:-translate-y-0.5"
-                >
-                  Open top case study
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
+                <div className="inline-flex items-center gap-2 self-start rounded-md border border-border bg-card/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:self-auto">
+                  <Grid3X3 className="h-3.5 w-3.5 text-accent" />
+                  {showcase.length} more
+                </div>
               </div>
-            ) : null}
+
+              {showcase.length > 0 ? (
+                <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {showcase.map((project, index) => (
+                    <motion.div
+                      key={project.name}
+                      initial={coarseEffects ? false : { opacity: 0, y: 16 }}
+                      animate={coarseEffects ? undefined : { opacity: 1, y: 0 }}
+                      transition={
+                        coarseEffects
+                          ? undefined
+                          : {
+                              duration: durations.base,
+                              ease: easings.emphasized,
+                              delay: Math.min(index, 5) * 0.035,
+                            }
+                      }
+                    >
+                      <ProjectCard
+                        coarseEffects={coarseEffects}
+                        project={project}
+                        index={featured.length + index}
+                        githubUrl={PROJECT_LINKS[project.name]}
+                        disableReveal
+                        bulletLimit={2}
+                        stackLimit={4}
+                        variant="compact"
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-7 rounded-lg border border-border bg-card/70 p-8 text-sm text-muted-foreground">
+                  The active filter is concentrated in the featured set above.
+                </div>
+              )}
+
+              <div className="mt-12 flex flex-col gap-4 rounded-lg border border-border bg-card/80 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Repository map
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Each project card keeps direct details and repository access.
+                  </p>
+                </div>
+
+                <a
+                  href={resume.personal.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-md border border-border bg-background/70 px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:text-accent"
+                >
+                  <GithubIcon className="h-4 w-4" />
+                  GitHub profile
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
+              {topFeaturedProject ? (
+                <div className="mt-8 flex justify-end">
+                  <Link
+                    to={`/projects/${projectSlug(topFeaturedProject.name)}`}
+                    className="group inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition-transform hover:-translate-y-0.5"
+                  >
+                    Open top case study
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           </>
         )}
       </section>

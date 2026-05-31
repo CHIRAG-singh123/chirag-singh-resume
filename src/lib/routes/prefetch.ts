@@ -26,3 +26,7 @@ export function prefetchRoute(path: string) {
   )
   if (parent) void ROUTE_PREFETCHERS[parent]!()
 }
+
+export function prefetchRoutes(paths: readonly string[]) {
+  paths.forEach((path) => prefetchRoute(path))
+}

@@ -12,8 +12,8 @@ interface TimelineItemProps {
 export function TimelineItem({ item, index, isLast = false }: TimelineItemProps) {
   return (
     <motion.li
-      initial={{ opacity: 0, x: -distances.md, filter: 'blur(6px)' }}
-      whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+      initial={{ opacity: 0, x: -distances.md }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{
         duration: durations.medium,

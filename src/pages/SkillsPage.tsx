@@ -27,15 +27,15 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Tools: Wrench,
 }
 
-const SKILL_GROUP_SECTION_STYLE: CSSProperties = {
+const SKILL_GROUP_SECTION_STYLE = {
   containIntrinsicSize: '960px',
   contentVisibility: 'auto',
-}
+} as CSSProperties
 
-const SPECIALTIES_SECTION_STYLE: CSSProperties = {
+const SPECIALTIES_SECTION_STYLE = {
   containIntrinsicSize: '720px',
   contentVisibility: 'auto',
-}
+} as CSSProperties
 
 export function SkillsPage() {
   const { coarseEffects } = usePerfProfile()
@@ -51,8 +51,9 @@ export function SkillsPage() {
     ? 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent'
     : 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift'
 
-  const groupHaloClass =
-    'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/8 opacity-70 transition-opacity duration-300 group-hover:opacity-100'
+  const groupHaloClass = coarseEffects
+    ? 'hidden'
+    : 'absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/8 opacity-70 transition-opacity duration-300 group-hover:opacity-100'
 
   const specialtySurfaceClass = coarseEffects
     ? 'rounded-2xl border border-border bg-background/85 p-5 transition-[border-color,box-shadow] duration-300 hover:border-accent/50'
@@ -102,18 +103,15 @@ export function SkillsPage() {
                 <motion.div
                   key={group.label}
                   variants={itemVariantsScale}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: viewport.once, amount: 0.2 }}
+                  initial={coarseEffects ? false : 'hidden'}
+                  whileInView={coarseEffects ? undefined : 'show'}
+                  viewport={coarseEffects ? undefined : { once: viewport.once, amount: 0.2 }}
                   transition={
                     coarseEffects
                       ? { duration: durations.fast }
                       : cinematicTransition(durations.medium, idx * 0.08)
                   }
-                  whileHover={{
-                    y: coarseEffects ? -3 : -6,
-                    transition: springs.hover,
-                  }}
+                  whileHover={coarseEffects ? undefined : { y: -6, transition: springs.hover }}
                   className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-xl"
                 >
                   <div className={groupHaloClass} />
@@ -184,18 +182,15 @@ export function SkillsPage() {
                 <motion.div
                   key={item}
                   variants={itemVariantsScale}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: viewport.once, amount: 0.4 }}
+                  initial={coarseEffects ? false : 'hidden'}
+                  whileInView={coarseEffects ? undefined : 'show'}
+                  viewport={coarseEffects ? undefined : { once: viewport.once, amount: 0.4 }}
                   transition={
                     coarseEffects
                       ? { duration: durations.fast }
                       : cinematicTransition(durations.base, idx * 0.06)
                   }
-                  whileHover={{
-                    y: coarseEffects ? -2 : -4,
-                    transition: springs.hover,
-                  }}
+                  whileHover={coarseEffects ? undefined : { y: -4, transition: springs.hover }}
                   className={specialtySurfaceClass}
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">

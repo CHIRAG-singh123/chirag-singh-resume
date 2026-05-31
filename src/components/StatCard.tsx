@@ -40,8 +40,8 @@ export function StatCard({ icon: Icon, value, suffix = '+', label, delay = 0 }: 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={cinematicTransition(durations.medium, delay)}
       whileHover={{ y: -4, transition: springs.hover }}

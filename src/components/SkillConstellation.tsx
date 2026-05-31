@@ -141,7 +141,7 @@ export function SkillConstellation({
 
   const motionReduced = reduceMotion
   const staticVisuals = motionReduced || coarseEffects
-  const orbitSpinEnabled = !motionReduced
+  const orbitSpinEnabled = !staticVisuals
   const hubGradientClass = staticVisuals ? '' : 'skill-hub-gradient-anim'
   const hubLabelAnimated = !staticVisuals
 

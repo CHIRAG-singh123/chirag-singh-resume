@@ -65,6 +65,7 @@ export function Navbar() {
 
   const linkPrefetch = (to: string) => ({
     onMouseEnter: () => prefetchRoute(to),
+    onMouseDown: () => prefetchRoute(to),
     onFocus: () => prefetchRoute(to),
     onTouchStart: () => prefetchRoute(to),
   })

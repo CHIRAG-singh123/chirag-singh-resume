@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import type { CSSProperties } from 'react'
 import {
   ArrowRight,
   Award,
@@ -22,18 +23,39 @@ import { StatCard } from '../components/StatCard'
 import { TypingText } from '../components/TypingText'
 import { CONTACT_LINKS, PROJECT_LINKS, resume } from '../data/resume'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
+import { usePerfProfile } from '../lib/usePerfProfile'
+
+const HOME_FEATURED_SECTION_STYLE = {
+  containIntrinsicSize: '1200px',
+  contentVisibility: 'auto',
+} as CSSProperties
+
+const HOME_COLLAB_SECTION_STYLE = {
+  containIntrinsicSize: '720px',
+  contentVisibility: 'auto',
+} as CSSProperties
 
 export function HomePage() {
+  const { coarseEffects } = usePerfProfile()
+
   useDocumentHead({
     title: `${resume.personal.name} — ${resume.personal.title}`,
     description: resume.summary,
     canonical: '/',
   })
 
+  const heroGradientClass = coarseEffects
+    ? 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent'
+    : 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift'
+
+  const surfaceButtonClass = coarseEffects
+    ? 'group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:bg-accent/10'
+    : 'group inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10'
+
   return (
-    <PageTransition>
+    <PageTransition variant="transformOnly">
       <section className="relative overflow-hidden">
-        <GradientBlobs />
+        <GradientBlobs density={coarseEffects ? 'light' : 'normal'} animated={!coarseEffects} />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-grid-pattern bg-grid opacity-[0.04]"
@@ -60,15 +82,19 @@ export function HomePage() {
             >
               Hi, I'm <span className="text-accent">{resume.personal.name.split(' ')[0]}</span>
               <br />
-              <span className="bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift">
-                <TypingText
-                  phrases={[
-                    'AI-Augmented Developer',
-                    'Flutter Developer',
-                    'ML / GAN Enthusiast',
-                    'MERN & Django Dev',
-                  ]}
-                />
+              <span className={heroGradientClass}>
+                {coarseEffects ? (
+                  'AI-Augmented Developer'
+                ) : (
+                  <TypingText
+                    phrases={[
+                      'AI-Augmented Developer',
+                      'Flutter Developer',
+                      'ML / GAN Enthusiast',
+                      'MERN & Django Dev',
+                    ]}
+                  />
+                )}
               </span>
             </motion.h1>
 
@@ -86,7 +112,7 @@ export function HomePage() {
               <DownloadResumeButton size="lg" />
               <Link
                 to="/contact"
-                className="group inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10"
+                className={surfaceButtonClass}
               >
                 Contact Me
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -157,7 +183,8 @@ export function HomePage() {
         </div>
       </section>
 
-      <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div style={HOME_FEATURED_SECTION_STYLE}>
+        <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Featured Work"
           title={
@@ -177,19 +204,22 @@ export function HomePage() {
         </div>
 
         <div className="mt-10 flex justify-center">
-          <Link
-            to="/projects"
-            className="group inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10"
-          >
+          <Link to="/projects" className={surfaceButtonClass}>
             View all projects
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-      </AnimatedSection>
+        </AnimatedSection>
+      </div>
 
-      <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div style={HOME_COLLAB_SECTION_STYLE}>
+        <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-xl sm:p-14">
-          <div className="absolute inset-0 -z-10 bg-hero-gradient bg-[length:200%_200%] opacity-10 animate-gradient-shift" />
+          <div
+            className={`absolute inset-0 -z-10 bg-hero-gradient bg-[length:200%_200%] opacity-10 ${
+              coarseEffects ? '' : 'animate-gradient-shift'
+            }`}
+          />
           <SectionHeading
             eyebrow="Let's collaborate"
             title="Have a project in mind?"
@@ -222,7 +252,8 @@ export function HomePage() {
             </Link>
           </div>
         </div>
-      </AnimatedSection>
+        </AnimatedSection>
+      </div>
     </PageTransition>
   )
 }
