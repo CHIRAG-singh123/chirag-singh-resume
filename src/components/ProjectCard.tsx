@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowUpRight, ExternalLink, Layers3 } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from './BrandIcons'
 import { ProjectStackChip } from './ProjectStackChip'
@@ -16,10 +17,10 @@ import {
 
 const DEFAULT_BULLET_LIMIT = 2
 const DEFAULT_STACK_LIMIT = 4
-const SUMMARY_CLAMP_STYLE = {
+const SUMMARY_CLAMP_STYLE: CSSProperties = {
   display: '-webkit-box',
   overflow: 'hidden',
-  WebkitBoxOrient: 'vertical' as const,
+  WebkitBoxOrient: 'vertical',
   WebkitLineClamp: 2,
 }
 
