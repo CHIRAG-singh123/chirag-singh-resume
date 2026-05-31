@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { ArrowRight, ExternalLink, Filter, Grid3X3, Layers3, Sparkles } from 'lucide-react'
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GithubIcon } from '../components/BrandIcons'
 import { PageTransition } from '../components/PageTransition'
@@ -16,11 +16,6 @@ const FEATURED_PROJECT_NAME_SET = new Set<string>(FEATURED_PROJECT_NAMES)
 const FEATURED_PROJECT_ORDER = new Map(
   FEATURED_PROJECT_NAMES.map((name, index) => [name, index] as const),
 )
-
-const PROJECT_LEDGER_SECTION_STYLE = {
-  containIntrinsicSize: '1400px',
-  contentVisibility: 'auto',
-} as CSSProperties
 
 const tagRowVariants: Variants = {
   hidden: {},
@@ -261,7 +256,7 @@ export function ProjectsPage() {
               </>
             ) : null}
 
-            <div style={PROJECT_LEDGER_SECTION_STYLE}>
+            <div style={{ containIntrinsicSize: '1400px', contentVisibility: 'auto' }}>
               <div
                 className={`${hasFeatured ? 'mt-14' : ''} flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between`}
               >

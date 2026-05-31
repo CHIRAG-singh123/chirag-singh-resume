@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { Boxes, Code2, Cpu, Wrench } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { CSSProperties } from 'react'
 import { AnimatedSection } from '../components/AnimatedSection'
 import { GradientBlobs } from '../components/GradientBlobs'
 import { PageTransition } from '../components/PageTransition'
@@ -26,16 +25,6 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Technologies: Cpu,
   Tools: Wrench,
 }
-
-const SKILL_GROUP_SECTION_STYLE = {
-  containIntrinsicSize: '960px',
-  contentVisibility: 'auto',
-} as CSSProperties
-
-const SPECIALTIES_SECTION_STYLE = {
-  containIntrinsicSize: '720px',
-  contentVisibility: 'auto',
-} as CSSProperties
 
 export function SkillsPage() {
   const { coarseEffects } = usePerfProfile()
@@ -91,7 +80,7 @@ export function SkillsPage() {
         </div>
       </section>
 
-      <div style={SKILL_GROUP_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '960px', contentVisibility: 'auto' }}>
         <AnimatedSection
           className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8"
           variant="soft"
@@ -150,7 +139,7 @@ export function SkillsPage() {
         </AnimatedSection>
       </div>
 
-      <div style={SPECIALTIES_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '720px', contentVisibility: 'auto' }}>
         <AnimatedSection
           className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8"
           variant="soft"

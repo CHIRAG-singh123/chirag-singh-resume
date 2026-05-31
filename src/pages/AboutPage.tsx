@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { GraduationCap, MapPin, Mail, Phone, Award } from 'lucide-react'
-import type { CSSProperties, ComponentType, SVGProps } from 'react'
+import type { ComponentType, SVGProps } from 'react'
 import { AnimatedSection } from '../components/AnimatedSection'
 import { GithubIcon, LinkedinIcon } from '../components/BrandIcons'
 import { GradientBlobs } from '../components/GradientBlobs'
@@ -18,16 +18,6 @@ import {
   springs,
   viewport,
 } from '../motion'
-
-const ABOUT_EDUCATION_SECTION_STYLE = {
-  containIntrinsicSize: '980px',
-  contentVisibility: 'auto',
-} as CSSProperties
-
-const ABOUT_CERTIFICATES_SECTION_STYLE = {
-  containIntrinsicSize: '720px',
-  contentVisibility: 'auto',
-} as CSSProperties
 
 export function AboutPage() {
   const { coarseEffects } = usePerfProfile()
@@ -131,7 +121,7 @@ export function AboutPage() {
         </div>
       </AnimatedSection>
 
-      <div style={ABOUT_EDUCATION_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '980px', contentVisibility: 'auto' }}>
         <AnimatedSection className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Education"
@@ -178,7 +168,7 @@ export function AboutPage() {
         </AnimatedSection>
       </div>
 
-      <div style={ABOUT_CERTIFICATES_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '720px', contentVisibility: 'auto' }}>
         <AnimatedSection className="mx-auto max-w-5xl px-4 pb-24 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Certificates"

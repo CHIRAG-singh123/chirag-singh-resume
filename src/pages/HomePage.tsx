@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import type { CSSProperties } from 'react'
 import {
   ArrowRight,
   Award,
@@ -24,16 +23,6 @@ import { TypingText } from '../components/TypingText'
 import { CONTACT_LINKS, PROJECT_LINKS, resume } from '../data/resume'
 import { useDocumentHead } from '../lib/seo/useDocumentHead'
 import { usePerfProfile } from '../lib/usePerfProfile'
-
-const HOME_FEATURED_SECTION_STYLE = {
-  containIntrinsicSize: '1200px',
-  contentVisibility: 'auto',
-} as CSSProperties
-
-const HOME_COLLAB_SECTION_STYLE = {
-  containIntrinsicSize: '720px',
-  contentVisibility: 'auto',
-} as CSSProperties
 
 export function HomePage() {
   const { coarseEffects } = usePerfProfile()
@@ -183,7 +172,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <div style={HOME_FEATURED_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '1200px', contentVisibility: 'auto' }}>
         <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Featured Work"
@@ -212,7 +201,7 @@ export function HomePage() {
         </AnimatedSection>
       </div>
 
-      <div style={HOME_COLLAB_SECTION_STYLE}>
+      <div style={{ containIntrinsicSize: '720px', contentVisibility: 'auto' }}>
         <AnimatedSection className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-xl sm:p-14">
           <div
