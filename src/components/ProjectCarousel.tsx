@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { GithubIcon } from './BrandIcons'
 import { ProjectCard } from './ProjectCard'
@@ -17,6 +18,11 @@ const VISIBLE_DESKTOP = 3
 const VISIBLE_TABLET = 2
 const VISIBLE_MOBILE = 1
 const COARSE_INTERVAL_MS = 4200
+
+const CAROUSEL_SECTION_STYLE = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '560px',
+} satisfies CSSProperties
 
 type VisibleProject = {
   project: Project
@@ -101,7 +107,8 @@ export function ProjectCarousel({
   return (
     <section
       ref={rootRef}
-      className="relative [contain-intrinsic-size:560px] [content-visibility:auto]"
+      className="relative"
+      style={CAROUSEL_SECTION_STYLE}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
