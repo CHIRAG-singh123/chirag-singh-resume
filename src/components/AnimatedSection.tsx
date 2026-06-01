@@ -1,5 +1,6 @@
 import { motion, type Variants } from 'framer-motion'
 import type { ReactNode } from 'react'
+import { useRouteMotionBudget } from '../lib/routeMotionBudget'
 import {
   itemVariants,
   listStagger,
@@ -40,6 +41,7 @@ export function AnimatedSection({
 }: AnimatedSectionProps) {
   const MotionTag = motion[as]
   const baseVariants = variantMap[variant]
+  const rapidRouteSwitching = useRouteMotionBudget()
 
   const computedVariants: Variants = stagger
     ? {
@@ -64,11 +66,15 @@ export function AnimatedSection({
 
   return (
     <MotionTag
-      variants={computedVariants}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once, amount: viewportAmount ?? defaultViewport.amount }}
-      transition={{ delay }}
+      variants={rapidRouteSwitching ? undefined : computedVariants}
+      initial={rapidRouteSwitching ? false : 'hidden'}
+      whileInView={rapidRouteSwitching ? undefined : 'show'}
+      viewport={
+        rapidRouteSwitching
+          ? undefined
+          : { once, amount: viewportAmount ?? defaultViewport.amount }
+      }
+      transition={rapidRouteSwitching ? undefined : { delay }}
       className={className}
     >
       {children}

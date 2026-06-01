@@ -6,6 +6,7 @@ import { CommandPalette } from '../components/CommandPalette'
 import { Footer } from '../components/Footer'
 import { Navbar } from '../components/Navbar'
 import { ScrollProgress } from '../components/ScrollProgress'
+import { RouteMotionBudgetProvider } from '../lib/routeMotionBudget'
 import { prefetchRoutes } from '../lib/routes/prefetch'
 import { PersonJsonLd } from '../lib/seo/JsonLd'
 
@@ -37,18 +38,20 @@ export function RootLayout() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
-      <PersonJsonLd />
-      <ScrollProgress />
-      <Navbar />
-      <main id="main-content" tabIndex={-1} className="relative">
-        <AnimatedOutlet />
-      </main>
-      <Footer />
-      <BackToTop />
-      <CommandPalette />
+      <RouteMotionBudgetProvider>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <PersonJsonLd />
+        <ScrollProgress />
+        <Navbar />
+        <main id="main-content" tabIndex={-1} className="relative">
+          <AnimatedOutlet />
+        </main>
+        <Footer />
+        <BackToTop />
+        <CommandPalette />
+      </RouteMotionBudgetProvider>
     </div>
   )
 }

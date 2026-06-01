@@ -26,6 +26,7 @@ import { usePerfProfile } from '../lib/usePerfProfile'
 
 export function HomePage() {
   const { coarseEffects } = usePerfProfile()
+  const heroMotionEnabled = !coarseEffects
 
   useDocumentHead({
     title: `${resume.personal.name} — ${resume.personal.title}`,
@@ -38,8 +39,8 @@ export function HomePage() {
     : 'bg-hero-gradient bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-shift'
 
   const surfaceButtonClass = coarseEffects
-    ? 'group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-accent/60 hover:bg-accent/10'
-    : 'group inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10'
+    ? 'group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground shadow-sm transition-[border-color,box-shadow] hover:border-accent/60 hover:shadow-md'
+    : 'group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground shadow-sm transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-accent/60 hover:shadow-md'
 
   return (
     <PageTransition variant="transformOnly">
@@ -52,13 +53,13 @@ export function HomePage() {
 
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:gap-16 lg:px-8 lg:py-24">
           <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="show"
+            variants={heroMotionEnabled ? staggerContainer : undefined}
+            initial={heroMotionEnabled ? 'hidden' : false}
+            animate={heroMotionEnabled ? 'show' : undefined}
             className="relative z-10"
           >
             <motion.span
-              variants={staggerItem}
+              variants={heroMotionEnabled ? staggerItem : undefined}
               className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-accent"
             >
               <Sparkles className="h-3.5 w-3.5" />
@@ -66,7 +67,7 @@ export function HomePage() {
             </motion.span>
 
             <motion.h1
-              variants={staggerItem}
+              variants={heroMotionEnabled ? staggerItem : undefined}
               className="mt-6 font-display text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl"
             >
               Hi, I'm <span className="text-accent">{resume.personal.name.split(' ')[0]}</span>
@@ -88,14 +89,14 @@ export function HomePage() {
             </motion.h1>
 
             <motion.p
-              variants={staggerItem}
+              variants={heroMotionEnabled ? staggerItem : undefined}
               className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             >
               {resume.summary}
             </motion.p>
 
             <motion.div
-              variants={staggerItem}
+              variants={heroMotionEnabled ? staggerItem : undefined}
               className="mt-8 flex flex-wrap items-center gap-3"
             >
               <DownloadResumeButton size="lg" />
@@ -109,7 +110,7 @@ export function HomePage() {
             </motion.div>
 
             <motion.div
-              variants={staggerItem}
+              variants={heroMotionEnabled ? staggerItem : undefined}
               className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
             >
               <span className="inline-flex items-center gap-2">

@@ -108,9 +108,13 @@ export function ProjectsPage() {
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-end">
             <motion.div
-              initial={coarseEffects ? { opacity: 0, y: 12 } : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: durations.base, ease: easings.emphasized }}
+              initial={coarseEffects ? false : { opacity: 0, y: 18 }}
+              animate={coarseEffects ? undefined : { opacity: 1, y: 0 }}
+              transition={
+                coarseEffects
+                  ? undefined
+                  : { duration: durations.base, ease: easings.emphasized }
+              }
             >
               <span className="inline-flex items-center gap-2 rounded-md border border-border bg-card/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 text-accent" />
@@ -128,9 +132,13 @@ export function ProjectsPage() {
             </motion.div>
 
             <motion.div
-              initial={coarseEffects ? { opacity: 0, y: 10 } : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: durations.base, ease: easings.emphasized, delay: 0.05 }}
+              initial={coarseEffects ? false : { opacity: 0, y: 16 }}
+              animate={coarseEffects ? undefined : { opacity: 1, y: 0 }}
+              transition={
+                coarseEffects
+                  ? undefined
+                  : { duration: durations.base, ease: easings.emphasized, delay: 0.05 }
+              }
               className="grid grid-cols-2 gap-3"
             >
               {metrics.map((metric) => (

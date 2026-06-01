@@ -1,5 +1,6 @@
 import { useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
+import { useRouteMotionBudget } from './routeMotionBudget'
 
 function readHardwareCoarse(): boolean {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') return false
@@ -18,7 +19,8 @@ function readHardwareCoarse(): boolean {
 export function usePerfProfile() {
   const reduceMotion = useReducedMotion() ?? false
   const [hardwareCoarse] = useState(readHardwareCoarse)
+  const rapidRouteSwitching = useRouteMotionBudget()
 
-  const coarseEffects = reduceMotion || hardwareCoarse
-  return { reduceMotion, hardwareCoarse, coarseEffects }
+  const coarseEffects = reduceMotion || hardwareCoarse || rapidRouteSwitching
+  return { reduceMotion, hardwareCoarse, rapidRouteSwitching, coarseEffects }
 }

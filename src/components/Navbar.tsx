@@ -58,11 +58,6 @@ export function Navbar() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  const initials = resume.personal.name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-
   const linkPrefetch = (to: string) => ({
     onMouseEnter: () => prefetchRoute(to),
     onMouseDown: () => prefetchRoute(to),
@@ -85,10 +80,23 @@ export function Navbar() {
         className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
         aria-label="Primary"
       >
-        <NavLink to="/" className="group flex items-center gap-3" {...linkPrefetch('/')}>
-          <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-hero-gradient bg-[length:200%_200%] animate-gradient-shift font-display font-bold text-white shadow-md">
-            <span className="relative z-10 text-sm tracking-widest">{initials}</span>
-            <span className="absolute inset-0 bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
+        <NavLink
+          to="/"
+          aria-label={`${resume.personal.name} home`}
+          className="group flex min-w-0 items-center gap-3"
+          {...linkPrefetch('/')}
+        >
+          <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-md transition-transform duration-300 group-hover:-translate-y-0.5">
+            <img
+              src="/favicon.svg"
+              alt=""
+              width="44"
+              height="44"
+              loading="eager"
+              decoding="async"
+              draggable={false}
+              className="block h-11 w-11"
+            />
           </span>
           <span className="hidden flex-col leading-tight sm:flex">
             <span className="text-sm font-semibold text-foreground">

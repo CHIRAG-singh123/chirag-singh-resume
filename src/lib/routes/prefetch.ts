@@ -4,6 +4,8 @@
 
 type Loader = () => Promise<unknown>
 
+const warmedRoutes = new Set<string>()
+
 export const ROUTE_PREFETCHERS: Record<string, Loader> = {
   '/': () => import('../../pages/HomePage'),
   '/about': () => import('../../pages/AboutPage'),
@@ -14,17 +16,25 @@ export const ROUTE_PREFETCHERS: Record<string, Loader> = {
 }
 
 export function prefetchRoute(path: string) {
+  const warm = (resolvedPath: string, loader: Loader) => {
+    if (warmedRoutes.has(resolvedPath)) return
+    warmedRoutes.add(resolvedPath)
+    void loader().catch(() => {
+      warmedRoutes.delete(resolvedPath)
+    })
+  }
+
   // Match the pathname against known prefetchers. For dynamic segments
   // (e.g. /projects/:slug) fall back to the parent route.
   const direct = ROUTE_PREFETCHERS[path]
   if (direct) {
-    void direct()
+    warm(path, direct)
     return
   }
   const parent = Object.keys(ROUTE_PREFETCHERS).find(
     (key) => key !== '/' && path.startsWith(key + '/'),
   )
-  if (parent) void ROUTE_PREFETCHERS[parent]!()
+  if (parent) warm(parent, ROUTE_PREFETCHERS[parent]!)
 }
 
 export function prefetchRoutes(paths: readonly string[]) {
