@@ -140,13 +140,13 @@ export function SkillConstellation({
   )
 
   const motionReduced = reduceMotion
-  const staticVisuals = motionReduced || coarseEffects
-  const orbitSpinEnabled = !staticVisuals
-  const hubGradientClass = staticVisuals ? '' : 'skill-hub-gradient-anim'
-  const hubLabelAnimated = !staticVisuals
+  const introAnimationsEnabled = !motionReduced && !coarseEffects
+  const orbitSpinEnabled = !motionReduced
+  const hubGradientClass = introAnimationsEnabled ? 'skill-hub-gradient-anim' : ''
+  const hubLabelAnimated = introAnimationsEnabled
 
   useEffect(() => {
-    if (staticVisuals) {
+    if (!introAnimationsEnabled) {
       countMv.set(totalNodes)
       return
     }
@@ -157,7 +157,7 @@ export function SkillConstellation({
       ease: [0.22, 1, 0.36, 1],
     })
     return () => controls.stop()
-  }, [countMv, staticVisuals, totalNodes])
+  }, [countMv, introAnimationsEnabled, totalNodes])
 
   const syncPopupAnchor = useCallback((node: RingNodeDatum) => {
     const stage = stageRef.current
@@ -190,6 +190,9 @@ export function SkillConstellation({
   useEffect(() => {
     const svg = svgRef.current
     if (!svg || !orbitSpinEnabled) return
+    if (typeof svg.unpauseAnimations !== 'function' || typeof svg.pauseAnimations !== 'function') {
+      return
+    }
     if (inView) svg.unpauseAnimations()
     else svg.pauseAnimations()
   }, [inView, orbitSpinEnabled])
@@ -315,15 +318,15 @@ export function SkillConstellation({
               strokeOpacity="0.3"
               strokeDasharray="3 6"
               strokeWidth={1}
-              initial={staticVisuals ? undefined : { pathLength: 0, opacity: 0 }}
-              animate={staticVisuals ? undefined : { pathLength: 1, opacity: 1 }}
+              initial={introAnimationsEnabled ? { pathLength: 0, opacity: 0 } : undefined}
+              animate={introAnimationsEnabled ? { pathLength: 1, opacity: 1 } : undefined}
               transition={{
                 pathLength: {
                   duration: 1.1,
                   ease: easings.cinematic,
-                  delay: staticVisuals ? 0 : ringIndex * 0.08,
+                  delay: introAnimationsEnabled ? ringIndex * 0.08 : 0,
                 },
-                opacity: { duration: 0.5, delay: staticVisuals ? 0 : ringIndex * 0.08 },
+                opacity: { duration: 0.5, delay: introAnimationsEnabled ? ringIndex * 0.08 : 0 },
               }}
             />
           ))}
@@ -337,7 +340,7 @@ export function SkillConstellation({
                     type="rotate"
                     from="0 0 0"
                     to={ring.clockwise ? '360 0 0' : '-360 0 0'}
-                    dur={`${ring.durationSeconds}s`}
+                    dur={`${coarseEffects ? Math.round(ring.durationSeconds * 1.35) : ring.durationSeconds}s`}
                     repeatCount="indefinite"
                   />
                 ) : null}
@@ -350,14 +353,14 @@ export function SkillConstellation({
                   return (
                     <motion.g
                       key={node.id}
-                      initial={staticVisuals ? undefined : { opacity: 0, scale: 0.92 }}
-                      animate={staticVisuals ? undefined : { opacity: 1, scale: 1 }}
+                      initial={introAnimationsEnabled ? { opacity: 0, scale: 0.92 } : undefined}
+                      animate={introAnimationsEnabled ? { opacity: 1, scale: 1 } : undefined}
                       transition={{
-                        duration: staticVisuals ? 0 : durations.base,
+                        duration: introAnimationsEnabled ? durations.base : 0,
                         ease: easings.entrance,
-                        delay: staticVisuals
-                          ? 0
-                          : 0.24 + nodeIndex * 0.025 + ring.ringIndex * 0.05,
+                        delay: introAnimationsEnabled
+                          ? 0.24 + nodeIndex * 0.025 + ring.ringIndex * 0.05
+                          : 0,
                       }}
                       onMouseEnter={() => showPopup(node)}
                       onMouseLeave={() => clearHover(node.id)}
@@ -390,7 +393,7 @@ export function SkillConstellation({
                               type="rotate"
                               from="0 0 0"
                               to={ring.clockwise ? '-360 0 0' : '360 0 0'}
-                              dur={`${ring.durationSeconds}s`}
+                              dur={`${coarseEffects ? Math.round(ring.durationSeconds * 1.35) : ring.durationSeconds}s`}
                               repeatCount="indefinite"
                             />
                           ) : null}
@@ -437,9 +440,13 @@ export function SkillConstellation({
           ))}
 
           <motion.g
-            initial={staticVisuals ? undefined : { opacity: 0.88, scale: 0.94 }}
-            animate={staticVisuals ? undefined : { opacity: 1, scale: 1 }}
-            transition={{ duration: 0.58, ease: easings.cinematic, delay: staticVisuals ? 0 : 0.18 }}
+            initial={introAnimationsEnabled ? { opacity: 0.88, scale: 0.94 } : undefined}
+            animate={introAnimationsEnabled ? { opacity: 1, scale: 1 } : undefined}
+            transition={{
+              duration: 0.58,
+              ease: easings.cinematic,
+              delay: introAnimationsEnabled ? 0.18 : 0,
+            }}
           >
             <circle
               cx={CENTER}
@@ -448,7 +455,7 @@ export function SkillConstellation({
               fill="none"
               stroke="var(--color-accent)"
               strokeWidth={3.5}
-              className={staticVisuals ? 'opacity-[0.34]' : 'skill-hub-ring-pulse'}
+              className={introAnimationsEnabled ? 'skill-hub-ring-pulse' : 'opacity-[0.34]'}
             />
             <circle
               cx={CENTER}
@@ -464,9 +471,13 @@ export function SkillConstellation({
         <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center">
           <motion.div
             className="flex max-w-[36%] flex-col items-center justify-center text-center sm:max-w-[32%]"
-            initial={staticVisuals ? undefined : { opacity: 0, y: 8 }}
-            animate={staticVisuals ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.52, delay: staticVisuals ? 0 : 0.2, ease: easings.cinematic }}
+            initial={introAnimationsEnabled ? { opacity: 0, y: 8 } : undefined}
+            animate={introAnimationsEnabled ? { opacity: 1, y: 0 } : undefined}
+            transition={{
+              duration: 0.52,
+              delay: introAnimationsEnabled ? 0.2 : 0,
+              ease: easings.cinematic,
+            }}
           >
             <span className="inline-block font-display text-[clamp(1.2rem,5.5vw,1.55rem)] font-bold leading-none tabular-nums tracking-tight">
               <span
@@ -505,7 +516,7 @@ export function SkillConstellation({
               <motion.div
                 ref={popupCardRef}
                 key={popup.node.id}
-                initial={staticVisuals ? undefined : { opacity: 0, y: 6, scale: 0.96 }}
+                initial={introAnimationsEnabled ? { opacity: 0, y: 6, scale: 0.96 } : undefined}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 4, scale: 0.98 }}
                 transition={{ duration: durations.fast, ease: easings.cinematic }}
@@ -513,9 +524,9 @@ export function SkillConstellation({
               >
                 <span
                   className={
-                    staticVisuals
-                      ? 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md whitespace-normal'
-                      : 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card/95 px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md backdrop-blur-sm whitespace-normal'
+                    introAnimationsEnabled
+                      ? 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card/95 px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md backdrop-blur-sm whitespace-normal'
+                      : 'inline-flex max-w-full items-center justify-center rounded-full border border-border bg-card px-3.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.16em] text-foreground shadow-md whitespace-normal'
                   }
                 >
                   {popup.node.label}
