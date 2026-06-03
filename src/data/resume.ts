@@ -98,7 +98,7 @@ export const resume: ResumeData = {
       stack: ['Full-Stack', 'Real-time Chat', 'CRM', 'ERP', 'Chatbot', 'Analytics'],
     },
     {
-      name: 'Default Panel CMS',
+      name: 'CMS System',
       tagline: 'CMS-Driven Business Website + Admin Panel',
       bullets: [
         'Built a full-stack Laravel + React/Inertia CMS that powers a public business website and a secured admin panel from the same codebase.',
@@ -201,7 +201,7 @@ export const resume: ResumeData = {
  */
 export const PROJECT_LINKS: Record<string, string> = {
   Zentro: 'https://github.com/CHIRAG-singh123/ERP-CRM-Zentro',
-  'Default Panel CMS': 'https://github.com/CHIRAG-singh123/CMS-System',
+  'CMS System': 'https://github.com/CHIRAG-singh123/CMS-System',
   'Sentiment Analysis': 'https://github.com/CHIRAG-singh123/tweets-sentiment-analysis',
   'IGAN-Face-Generation': 'https://github.com/CHIRAG-singh123/IGAN-Face-Generation',
   'Admission Bot': 'https://github.com/CHIRAG-singh123/admission-bot.git',
