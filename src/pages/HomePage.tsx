@@ -29,7 +29,7 @@ export function HomePage() {
   const heroMotionEnabled = !coarseEffects
 
   useDocumentHead({
-    title: `${resume.personal.name} — ${resume.personal.title}`,
+    title: `${resume.personal.name} an ${resume.personal.title}`,
     description: resume.summary,
     canonical: '/',
   })
